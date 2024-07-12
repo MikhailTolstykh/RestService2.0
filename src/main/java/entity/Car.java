@@ -9,18 +9,18 @@ public class Car {
     private String model;
     private Customer customer;
     private long customerId;
-    private List<RepairOrder> repairOrders;
+
 
     public Car() {
 
     }
 
-    public Car(Long id, String model, Customer customer, Long customerId, List<RepairOrder> repairOrders) {
+    public Car(Long id, String model, Customer customer, Long customerId) {
         this.id = id;
         this.model = model;
         this.customer = customer;
         this.customerId = customerId;
-        this.repairOrders = repairOrders;
+
     }
 
     public Long getId() {
@@ -49,6 +49,7 @@ public class Car {
     }
 
     public Long getCustomerId() {
+
         return customerId;
     }
 
@@ -56,11 +57,4 @@ public class Car {
         this.customerId = customerId;
     }
 
-    public List<RepairOrder> getRepairOrders() {
-        return repairOrders;
-    }
-
-    public void setRepairOrders(List<RepairOrder> repairOrders) {
-        this.repairOrders = repairOrders;
-    }
 }
