@@ -1,14 +1,17 @@
 package entity;
 
-public class Mechanic {
-    private long id;
-    private String name;
+import java.util.List;
 
-    public long getId() {
+public class Mechanic {
+    private int id;
+    private String name;
+    private List<Car> cars;
+
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -17,6 +20,19 @@ public class Mechanic {
     }
 
     public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Car> getCars() {
+        return cars;
+    }
+
+    public void setCars(List<Car> cars) {
+        this.cars = cars;
+    }
+
+    public Mechanic(int id, String name) {
+        this.id = id;
         this.name = name;
     }
 }

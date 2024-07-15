@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class CustomerRepository {
+public class CustomerRepository implements CustomerInterface {
 
     private String URL = DatabaseConfig.getProperty("db.url");
     private String Username = DatabaseConfig.getProperty("db.username");

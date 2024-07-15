@@ -5,29 +5,36 @@ import entity.Customer;
 import java.util.List;
 
 public class Car {
-    private long id;
+    private int id;
     private String model;
     private Customer customer;
-    private long customerId;
+    private int customerId;
+    private List<Mechanic> mechanics;
 
+    public List<Mechanic> getMechanics() {
+        return mechanics;
+    }
+
+    public void setMechanics(List<Mechanic> mechanics) {
+        this.mechanics = mechanics;
+    }
 
     public Car() {
 
     }
 
-    public Car(Long id, String model, Customer customer, Long customerId) {
+    public Car(int id, String model, Customer customer, Integer customerId) {
         this.id = id;
         this.model = model;
         this.customer = customer;
         this.customerId = customerId;
-
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -48,12 +55,12 @@ public class Car {
         this.customer = customer;
     }
 
-    public Long getCustomerId() {
+    public int getCustomerId() {
 
         return customerId;
     }
 
-    public void setCustomerId(Long customerId) {
+    public void setCustomerId(int customerId) {
         this.customerId = customerId;
     }
 

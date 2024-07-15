@@ -8,6 +8,13 @@ public class Customer {
     private String email;
     private List<Car> cars;
 
+    public List<Car> getCars() {
+        return cars;
+    }
+
+    public void setCars(List<Car> cars) {
+        this.cars = cars;
+    }
 
     public int getId() {
         return id;
