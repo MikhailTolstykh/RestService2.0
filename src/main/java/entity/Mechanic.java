@@ -31,6 +31,10 @@ public class Mechanic {
         this.cars = cars;
     }
 
+
+    public Mechanic() {
+    }
+
     public Mechanic(int id, String name) {
         this.id = id;
         this.name = name;

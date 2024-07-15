@@ -20,10 +20,6 @@ public interface MechanicInterface {
 
     List<Car> getCarsByMechanicId(int mechanicId) throws SQLException;
 
-    void connectCarToMechanic(int mechanicId, int carId) throws SQLException;
-
-    void deleteConnectCarFromMechanic(int mechanicId, int carId) throws SQLException;
-
-    List<Mechanic> getMechanicsByCarId(int carId) throws SQLException ;
+    public List<Mechanic> getMechanicsByCarId(int CarId) throws SQLException;
 
 }

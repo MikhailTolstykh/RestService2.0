@@ -31,6 +31,10 @@ public class Customer {
         this.cars = cars;
     }
 
+    public Customer() {
+
+    }
+
     public String getName() {
         return name;
     }

@@ -15,5 +15,6 @@ public interface CarServiceInterface {
 
     void deleteCar(int id) throws SQLException;
 
+
     List<Car> getAllCars() throws SQLException;
 }

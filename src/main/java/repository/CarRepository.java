@@ -35,6 +35,7 @@ public class CarRepository implements CarInterface{
         return connection;
     }
 
+     @Override
     public void addCar(Car car) throws SQLException {
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CAR_SQL)) {
@@ -44,6 +45,7 @@ public class CarRepository implements CarInterface{
         }
     }
 
+    @Override
     public Car getCarById(int id) throws SQLException {
         Car car = null;
         try (Connection connection = getConnection();
@@ -66,7 +68,9 @@ public class CarRepository implements CarInterface{
         }
     }
 
- public void updateCar(Car car) throws SQLException {
+    @Override
+
+    public void updateCar(Car car) throws SQLException {
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CAR_SQL)) {
             preparedStatement.setString(1, car.getModel());
@@ -77,6 +81,7 @@ public class CarRepository implements CarInterface{
         }
     }
 
+    @Override
     public void deleteCar(int id) throws SQLException {
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CAR_SQL)) {
@@ -85,6 +90,7 @@ public class CarRepository implements CarInterface{
         }
     }
 
+    @Override
     public List<Car> getAllCars() throws SQLException {
         List<Car> cars = new ArrayList<>();
 
@@ -103,7 +109,7 @@ public class CarRepository implements CarInterface{
                 MechanicRepository mechanicRepository = new MechanicRepository();
                 List<Mechanic> mechanics = mechanicRepository.getMechanicsByCarId(id);
 
-                Car car = new Car(id, model, customer, customerId );
+                Car car = new Car(id, model, customer, customerId);
                 cars.add(car);
             }
         }
@@ -111,39 +117,25 @@ public class CarRepository implements CarInterface{
         return cars;
     }
 
-    public void deleteCarMechanics(int carId) throws SQLException {
-        try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CAR_MECHANICS_SQL)) {
-            preparedStatement.setInt(1, carId);
-            preparedStatement.executeUpdate();
-        }
 
-    }
-
-    public List<Mechanic> getMechanicsByCarId(int CarId) throws SQLException {
-        List<Mechanic> mechanics = new ArrayList<>();
-        try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MECHANICS_BY_CAR_ID)) {
-            preparedStatement.setInt(1,CarId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            MechanicRepository mechanicRepository = new MechanicRepository();
-            while (resultSet.next()) {
-                int mechanicId = resultSet.getInt("mechanic_id");
-                Mechanic mechanic = mechanicRepository.getMechanicById(mechanicId);
-                mechanics.add(mechanic);
-            }
-        }
-        return mechanics;
-    }
-
-  public void addCarMechanic(int carId, int mechanicId) throws SQLException {
-        try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CAR_MECHANIC_SQL)) {
-            preparedStatement.setInt(1, carId);
-            preparedStatement.setInt(2, mechanicId);
-            preparedStatement.executeUpdate();
+@Override
+public List<Mechanic> getMechanicsByCarId(int CarId) throws SQLException {
+    List<Mechanic> mechanics = new ArrayList<>();
+    try (Connection connection = getConnection();
+         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MECHANICS_BY_CAR_ID)) {
+        preparedStatement.setInt(1, CarId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        MechanicRepository mechanicRepository = new MechanicRepository();
+        while (resultSet.next()) {
+            int mechanicId = resultSet.getInt("mechanic_id");
+            Mechanic mechanic = mechanicRepository.getMechanicById(mechanicId);
+            mechanics.add(mechanic);
         }
     }
+    return mechanics;
+}
+
+
 }
 
 

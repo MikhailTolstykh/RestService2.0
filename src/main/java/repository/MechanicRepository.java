@@ -1,6 +1,7 @@
 package repository;
 
 import entity.Car;
+import entity.Customer;
 import entity.Mechanic;
 
 import java.sql.*;
@@ -20,8 +21,7 @@ public class MechanicRepository implements MechanicInterface {
     private static final String SELECT_CARS_BY_MECHANIC_ID_SQL = "SELECT c.id, c.model, c.customer_id FROM cars c " +
             "INNER JOIN mechanic_car mc ON c.id = mc.car_id " +
             "WHERE mc.mechanic_id = ?";
-    private static final String INSERT_MECHANIC_CAR_SQL = "INSERT INTO mechanic_car (mechanic_id, car_id) VALUES (?, ?)";
-    private static final String DELETE_MECHANIC_CAR_SQL = "DELETE FROM mechanic_car WHERE mechanic_id = ? AND car_id = ?";
+
     private static final String SELECT_MECHANICS_BY_CAR_ID_SQL = "SELECT m.id, m.name " +   "FROM mechanic m " +
 
                     "JOIN car_mechanic cm ON m.id = cm.mechanic_id " +
@@ -89,7 +89,25 @@ public class MechanicRepository implements MechanicInterface {
         return mechanics;
     }
 
+
     @Override
+    public List<Mechanic> getMechanicsByCarId(int CarId) throws SQLException {
+        List<Mechanic> mechanics = new ArrayList<>();
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MECHANICS_BY_CAR_ID_SQL )) {
+            preparedStatement.setInt(1,CarId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            MechanicRepository mechanicRepository = new MechanicRepository();
+            while (resultSet.next()) {
+                int mechanicId = resultSet.getInt("mechanic_id");
+                Mechanic mechanic = mechanicRepository.getMechanicById(mechanicId);
+                mechanics.add(mechanic);
+            }
+        }
+        return mechanics;
+    }
+
+
     public List<Car> getCarsByMechanicId(int mechanicId) throws SQLException {
         List<Car> cars = new ArrayList<>();
         try (Connection connection = getConnection();
@@ -99,50 +117,19 @@ public class MechanicRepository implements MechanicInterface {
             while (resultSet.next()) {
                 int carId = resultSet.getInt("id");
                 String model = resultSet.getString("model");
+                int customerId = resultSet.getInt("customer_id");
 
-                // Создание объекта Car без указания customer и mechanics
-                Car car = new Car(carId, model, null, null);
+                CustomerRepository customerRepository = new CustomerRepository();
+                Customer customer = customerRepository.getCustomerById(customerId);
+
+
+                Car car = new Car(carId, model, customer, customerId);
                 cars.add(car);
             }
         }
         return cars;
     }
 
-    @Override
-    public void connectCarToMechanic(int mechanicId, int carId) throws SQLException {
-        try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_MECHANIC_CAR_SQL)) {
-            preparedStatement.setInt(1, mechanicId);
-            preparedStatement.setInt(2, carId);
-            preparedStatement.executeUpdate();
-        }
-    }
-
-    @Override
-    public void deleteConnectCarFromMechanic(int mechanicId, int carId) throws SQLException {
-        try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_MECHANIC_CAR_SQL)) {
-            preparedStatement.setInt(1, mechanicId);
-            preparedStatement.setInt(2, carId);
-            preparedStatement.executeUpdate();
-        }
-    }
-    public List<Mechanic> getMechanicsByCarId(int carId) throws SQLException {
-        List<Mechanic> mechanics = new ArrayList<>();
-        try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MECHANICS_BY_CAR_ID_SQL)) {
-            preparedStatement.setInt(1, carId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                int mechanicId = resultSet.getInt("id");
-                String name = resultSet.getString("name");
-
-                Mechanic mechanic = new Mechanic(mechanicId, name);
-                mechanics.add(mechanic);
-            }
-        }
-        return mechanics;
-    }
     protected Connection getConnection() {
         Connection connection = null;
         try {
