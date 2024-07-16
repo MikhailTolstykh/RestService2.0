@@ -14,9 +14,7 @@
             <node kind="database" qname="@">
               <node kind="schema" qname="@" />
             </node>
-            <node kind="database" qname="myDataBase">
-              <node kind="schema" qname="avtoservice" />
-            </node>
+            <node kind="database" qname="myDataBase" />
           </node>
         </introspection-scope>
       </schema-mapping>

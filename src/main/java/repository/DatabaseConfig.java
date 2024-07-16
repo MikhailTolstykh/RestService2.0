@@ -6,6 +6,7 @@ import java.util.Properties;
 
 public class DatabaseConfig {
     private static Properties properties = new Properties();
+// C:\\Users\\User\\IdeaProjects\\RestService\\target\\classes\\database.property
 
     static {
         try (InputStream input = DatabaseConfig.class.getClassLoader().getResourceAsStream("database.properties")) {

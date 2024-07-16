@@ -2,12 +2,16 @@ package service;
 
 import entity.Car;
 import repository.CarInterface;
+import repository.CarRepository;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class CarService implements CarServiceInterface {
     private final CarInterface carRepository;
+
+    public CarService() {  this.carRepository = new CarRepository();
+    }
 
     public CarService(CarInterface carRepository) {
         this.carRepository = carRepository;
@@ -38,3 +42,4 @@ public class CarService implements CarServiceInterface {
         return carRepository.getAllCars();
     }
 }
+

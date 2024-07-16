@@ -14,11 +14,14 @@ public class CarRepository implements CarInterface{
     private String Username = DatabaseConfig.getProperty("db.username");
     private String Password = DatabaseConfig.getProperty("db.password");
 
-    private static final String INSERT_CAR_SQL = "INSERT INTO cars (model, customer_id) VALUES (?, ?);";
-    private static final String SELECT_CAR_BY_ID = "SELECT id, model, customer_id FROM cars WHERE id = ?;";
-    private static final String SELECT_ALL_CARS = "SELECT * FROM cars;";
-    private static final String DELETE_CAR_SQL = "DELETE FROM cars WHERE id = ?;";
-    private static final String UPDATE_CAR_SQL = "UPDATE cars SET model = ?, customer_id = ? WHERE id = ?;";
+
+
+
+    private static final String INSERT_CAR_SQL = "INSERT INTO car_service.car (model, customer_id) VALUES (?, ?);";
+    private static final String SELECT_CAR_BY_ID = "SELECT id, model, customer_id FROM car_service.car WHERE id = ?;";
+    private static final String SELECT_ALL_CARS = "SELECT * FROM car_service.car;";
+    private static final String DELETE_CAR_SQL = "DELETE FROM car_service.car WHERE id = ?;";
+    private static final String UPDATE_CAR_SQL = "UPDATE car_service.car SET model = ?, customer_id = ? WHERE id = ?;";
 
     private static final String INSERT_CAR_MECHANIC_SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (?, ?);";
     private static final String DELETE_CAR_MECHANICS_SQL = "DELETE FROM car_mechanic WHERE car_id = ?;";
@@ -28,9 +31,12 @@ public class CarRepository implements CarInterface{
     protected Connection getConnection() {
         Connection connection = null;
         try {
+            Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(URL, Username, Password);
         } catch (SQLException e) {
             e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
         return connection;
     }

@@ -7,11 +7,17 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class CustomerService implements CustomerServiceInterface {
+
     private final CustomerRepository customerRepository;
+
+
+
 
     public CustomerService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
+
+
 
     @Override
     public void addCustomer(Customer customer) throws SQLException {

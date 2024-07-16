@@ -55,15 +55,6 @@ public class MechanicService implements MechanicServiceInterface {
         return mechanicRepository.getCarsByMechanicId(mechanicId);
     }
 
-    @Override
-    public void connectCarToMechanic(int mechanicId, int carId) throws SQLException {
-        mechanicRepository.connectCarToMechanic(mechanicId, carId);
-    }
-
-    @Override
-    public void deleteConnectCarFromMechanic(int mechanicId, int carId) throws SQLException {
-        mechanicRepository.deleteConnectCarFromMechanic(mechanicId, carId);
-    }
 
     @Override
     public List<Mechanic> getMechanicsByCarId(int carId) throws SQLException {
