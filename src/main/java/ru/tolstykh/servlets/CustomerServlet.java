@@ -27,6 +27,7 @@ public class CustomerServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        System.out.println("doGet called");
         String id = request.getParameter("id");
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();

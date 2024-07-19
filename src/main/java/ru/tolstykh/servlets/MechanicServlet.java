@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -17,14 +18,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MechanicServlet extends HttpServlet {
+
     private MechanicServiceInterface mechanicService;
 
     @Override
     public void init() throws ServletException {
-
-            MechanicRepository mechanicRepository = new MechanicRepository();
-            mechanicService = new MechanicService(mechanicRepository);
-
+        // Инициализация сервиса в методе init
+        // Здесь предполагается, что вы внедряете зависимость механика, можно сделать через конструктор или инъекцию
+        // Например, через DI контейнер, но здесь используем простую инициализацию для примера.
+        // Вы можете заменить это на ваш способ инициализации
+        mechanicService = new MechanicService(new MechanicRepository());
     }
 
     @Override
@@ -41,16 +44,13 @@ public class MechanicServlet extends HttpServlet {
                 out.write(mechanicDTOToJson(mechanicDTO));
             } else {
                 List<Mechanic> mechanics = mechanicService.getAllMechanics();
-                out.write("[");
-                for (int i = 0; i < mechanics.size(); i++) {
-                    MechanicDTO mechanicDTO = MechanicDTO.fromEntity(mechanics.get(i));
-                    out.write(mechanicDTOToJson(mechanicDTO));
-                    if (i < mechanics.size() - 1) {
-                        out.write(",");
-                    }
-                }
-                out.write("]");
+                String jsonArray = mechanics.stream()
+                        .map(MechanicDTO::fromEntity)
+                        .map(this::mechanicDTOToJson)
+                        .collect(Collectors.joining(",", "[", "]"));
+                out.write(jsonArray);
             }
+            out.flush();
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.write("{\"error\":\"" + e.getMessage() + "\"}");
@@ -59,10 +59,11 @@ public class MechanicServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        MechanicDTO mechanicDTO = jsonToMechanicDTO(request.getReader().lines().collect(Collectors.joining()));
+        String json = new BufferedReader(request.getReader()).lines().collect(Collectors.joining());
+        MechanicDTO mechanicDTO = jsonToMechanicDTO(json);
 
         try {
-            Mechanic mechanic = mechanicDTO.toEntity(); // Вызов метода toEntity() через экземпляр объекта
+            Mechanic mechanic = mechanicDTO.toEntity();
             mechanicService.addMechanic(mechanic);
             response.setStatus(HttpServletResponse.SC_CREATED);
             response.getWriter().write("{\"message\":\"Mechanic added successfully\"}");
@@ -72,14 +73,15 @@ public class MechanicServlet extends HttpServlet {
         }
     }
 
-
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        MechanicDTO mechanicDTO = jsonToMechanicDTO(request.getReader().lines().collect(Collectors.joining()));
+        String json = new BufferedReader(request.getReader()).lines().collect(Collectors.joining());
+        MechanicDTO mechanicDTO = jsonToMechanicDTO(json);
 
         try {
-            Mechanic mechanic = mechanicDTO.toEntity(); // Вызов метода toEntity() через экземпляр объекта
+            Mechanic mechanic = mechanicDTO.toEntity();
             mechanicService.updateMechanic(mechanic);
+            response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write("{\"message\":\"Mechanic updated successfully\"}");
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -95,6 +97,7 @@ public class MechanicServlet extends HttpServlet {
             if (id != null) {
                 int mechanicId = Integer.parseInt(id);
                 mechanicService.deleteMechanic(mechanicId);
+                response.setStatus(HttpServletResponse.SC_OK);
                 response.getWriter().write("{\"message\":\"Mechanic deleted successfully\"}");
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

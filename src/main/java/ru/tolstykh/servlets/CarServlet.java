@@ -39,21 +39,25 @@ public class CarServlet extends HttpServlet {
                 out.write(carDTOToJson(carDTO));
             } else {
                 List<Car> cars = carService.getAllCars();
-                out.write("[");
+                StringBuilder jsonResult = new StringBuilder("[");
                 for (int i = 0; i < cars.size(); i++) {
                     CarDTO carDTO = CarDTO.fromEntity(cars.get(i));
-                    out.write(carDTOToJson(carDTO));
+                    jsonResult.append(carDTOToJson(carDTO));
                     if (i < cars.size() - 1) {
-                        out.write(",");
+                        jsonResult.append(",");
                     }
                 }
-                out.write("]");
+                jsonResult.append("]");
+                out.write(jsonResult.toString());
             }
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.write("{\"error\":\"" + e.getMessage() + "\"}");
+        } finally {
+            out.flush();
         }
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -77,6 +81,7 @@ public class CarServlet extends HttpServlet {
         try {
             Car car = carDTO.toEntity();
             carService.updateCar(car);
+            response.setStatus(HttpServletResponse.SC_OK); // Добавьте эту строку
             response.getWriter().write("{\"message\":\"Car updated successfully\"}");
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -92,6 +97,7 @@ public class CarServlet extends HttpServlet {
             if (id != null) {
                 int carId = Integer.parseInt(id);
                 carService.deleteCar(carId);
+                response.setStatus(HttpServletResponse.SC_OK); // Добавьте эту строку
                 response.getWriter().write("{\"message\":\"Car deleted successfully\"}");
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -102,6 +108,7 @@ public class CarServlet extends HttpServlet {
             response.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
+
 
     private String carDTOToJson(CarDTO carDTO) {
         return String.format("{\"id\":%d,\"model\":\"%s\",\"customerId\":%d}", carDTO.getId(), carDTO.getModel(), carDTO.getCustomerId());
