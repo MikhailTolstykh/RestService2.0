@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CustomerServlet extends HttpServlet {
-    private CustomerServiceInterface customerService;
+    protected CustomerServiceInterface customerService;
 
     @Override
     public void init() throws ServletException {

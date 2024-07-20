@@ -14,8 +14,14 @@ public class CarRepository implements CarInterface{
     private String Username = DatabaseConfig.getProperty("db.username");
     private String Password = DatabaseConfig.getProperty("db.password");
 
+    public CarRepository() {
+    }
 
-
+    public CarRepository(String URL, String username, String password) {
+        this.URL = URL;
+        Username = username;
+        Password = password;
+    }
 
     private static final String INSERT_CAR_SQL = "INSERT INTO car_service.car (model, customer_id) VALUES (?, ?);";
     private static final String SELECT_CAR_BY_ID = "SELECT id, model, customer_id FROM car_service.car WHERE id = ?;";
@@ -140,30 +146,22 @@ public class CarRepository implements CarInterface{
         return cars;
     }
 
-@Override
-public List<Mechanic> getMechanicsByCarId(int CarId) throws SQLException {
-    List<Mechanic> mechanics = new ArrayList<>();
-    try (Connection connection = getConnection();
-         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MECHANICS_BY_CAR_ID)) {
-        preparedStatement.setInt(1, CarId);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        MechanicRepository mechanicRepository = new MechanicRepository();
-        while (resultSet.next()) {
-            int mechanicId = resultSet.getInt("mechanic_id");
-            Mechanic mechanic = mechanicRepository.getMechanicById(mechanicId);
-            mechanics.add(mechanic);
+    @Override
+    public List<Mechanic> getMechanicsByCarId(int CarId) throws SQLException {
+        List<Mechanic> mechanics = new ArrayList<>();
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MECHANICS_BY_CAR_ID)) {
+            preparedStatement.setInt(1, CarId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            MechanicRepository mechanicRepository = new MechanicRepository();
+            while (resultSet.next()) {
+                int mechanicId = resultSet.getInt("mechanic_id");
+                Mechanic mechanic = mechanicRepository.getMechanicById(mechanicId);
+                mechanics.add(mechanic);
+            }
         }
+        return mechanics;
     }
-    return mechanics;
-}
 
 
 }
-
-
-
-
-
-
-
-

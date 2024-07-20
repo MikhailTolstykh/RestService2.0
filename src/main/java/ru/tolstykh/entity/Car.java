@@ -9,6 +9,9 @@ public class Car {
     private int customerId;
     private List<Mechanic> mechanics;
 
+    public Car(String s, int id) {
+    }
+
     public List<Mechanic> getMechanics() {
         return mechanics;
     }

@@ -46,6 +46,12 @@ class MechanicServletTest {
         when(response.getWriter()).thenReturn(writer);
     }
 
+
+
+
+
+
+
     @Test
     void testDoGetWithId() throws Exception {
         // Setup
