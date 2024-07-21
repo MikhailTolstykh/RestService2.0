@@ -147,7 +147,7 @@ public class CarRepository implements CarInterface{
     }
 
     @Override
-    public List<Mechanic> getMechanicsByCarId(int CarId) throws SQLException {
+    public  List<Mechanic> getMechanicsByCarId(int CarId) throws SQLException {
         List<Mechanic> mechanics = new ArrayList<>();
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MECHANICS_BY_CAR_ID)) {

@@ -32,6 +32,13 @@ public class MechanicRepository implements MechanicInterface {
             "WHERE cm.car_id = ?";
 
     public MechanicRepository(String jdbcUrl, String username, String password) {
+        this.URL= jdbcUrl;
+        this.Username = username;
+        this.Password = password;
+
+        if (URL == null || Username == null || Password == null) {
+            throw new RuntimeException("Database configuration is missing. URL, Username, or Password is null.");
+        }
     }
 
     public MechanicRepository() {
@@ -46,7 +53,9 @@ public class MechanicRepository implements MechanicInterface {
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     mechanic.setId(generatedKeys.getInt(1));
+                    System.out.println("добавляю в базу ");
                 }
+
             }
         }
     }

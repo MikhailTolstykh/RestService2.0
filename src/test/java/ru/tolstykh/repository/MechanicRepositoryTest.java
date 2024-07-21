@@ -43,7 +43,8 @@ public class MechanicRepositoryTest {
         config.setDriverClassName("org.postgresql.Driver");
 
         dataSource = new HikariDataSource(config);
-       mechanicRepository = new MechanicRepository(postgresContainer.getJdbcUrl(),
+        mechanicRepository = new MechanicRepository(postgresContainer.
+                getJdbcUrl(),
                 postgresContainer.getUsername(),
                 postgresContainer.getPassword());
         System.out.println("Репозиторий подключился");
@@ -52,10 +53,6 @@ public class MechanicRepositoryTest {
     }
 
 
-    @Test
-    void test() {
-        System.out.println("выполнил");
-    }
 
 
     @BeforeEach
@@ -94,12 +91,12 @@ public class MechanicRepositoryTest {
                 """;
 
         String createCarTableSQL = """
-                CREATE TABLE IF NOT EXISTS car (
-                    id BIGSERIAL NOT NULL PRIMARY KEY,
-                    model TEXT NOT NULL,
-                    customer_id BIGINT NOT NULL
+                         CREATE TABLE IF NOT EXISTS car (
+                             id BIGSERIAL NOT NULL PRIMARY KEY,
+                             model TEXT NOT NULL,
+                             customer_id BIGINT NOT NULL
                 );
-                """;
+                         """;
 
         String createCarMechanicTableSQL = """
                 CREATE TABLE IF NOT EXISTS car_mechanic (
@@ -115,7 +112,7 @@ public class MechanicRepositoryTest {
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             statement.execute(createMechanicTableSQL);
-            statement.execute(createCarTableSQL);
+           statement.execute(createCarTableSQL);
             statement.execute(createCarMechanicTableSQL);
             statement.execute(createCustomerTableSQL);
         } catch (SQLException e) {
