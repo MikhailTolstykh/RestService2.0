@@ -7,6 +7,10 @@ public class Mechanic {
     private String name;
     private List<Car> cars;
 
+    public Mechanic(String name) {
+        this.name = name;
+    }
+
     public int getId() {
         return id;
     }

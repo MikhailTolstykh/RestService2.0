@@ -23,11 +23,11 @@ public class CarRepository implements CarInterface{
         Password = password;
     }
 
-    private static final String INSERT_CAR_SQL = "INSERT INTO car_service.car (model, customer_id) VALUES (?, ?);";
-    private static final String SELECT_CAR_BY_ID = "SELECT id, model, customer_id FROM car_service.car WHERE id = ?;";
-    private static final String SELECT_ALL_CARS = "SELECT * FROM car_service.car;";
-    private static final String DELETE_CAR_SQL = "DELETE FROM car_service.car WHERE id = ?;";
-    private static final String UPDATE_CAR_SQL = "UPDATE car_service.car SET model = ?, customer_id = ? WHERE id = ?;";
+    private static final String INSERT_CAR_SQL = "INSERT INTO car (model, customer_id) VALUES (?, ?);";
+    private static final String SELECT_CAR_BY_ID = "SELECT id, model, customer_id FROM car WHERE id = ?;";
+    private static final String SELECT_ALL_CARS = "SELECT * FROM car;";
+    private static final String DELETE_CAR_SQL = "DELETE FROM car WHERE id = ?;";
+    private static final String UPDATE_CAR_SQL = "UPDATE car SET model = ?, customer_id = ? WHERE id = ?;";
 
     private static final String INSERT_CAR_MECHANIC_SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (?, ?);";
     private static final String DELETE_CAR_MECHANICS_SQL = "DELETE FROM car_mechanic WHERE car_id = ?;";
@@ -74,7 +74,7 @@ public class CarRepository implements CarInterface{
 
                 Customer customer = null;
                 if (customerId != 0) {
-                    CustomerRepository customerRepository = new CustomerRepository();
+                    CustomerRepository customerRepository = new CustomerRepository(URL,Username,Password);
                     customer = customerRepository.getCustomerById(customerId);
                 }
 
@@ -130,7 +130,7 @@ public class CarRepository implements CarInterface{
 
                 Customer customer = null;
                 if (customerId != 0) {
-                    CustomerRepository customerRepository = new CustomerRepository();
+                    CustomerRepository customerRepository = new CustomerRepository(URL,Username,Password);
                     customer = customerRepository.getCustomerById(customerId);
                 }
 

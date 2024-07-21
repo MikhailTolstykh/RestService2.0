@@ -1,6 +1,5 @@
-CREATE SCHEMA IF NOT EXISTS car_service;
 
-create table if not exists car_service.car
+create table if not exists car
 (
     id          bigserial not null primary key,
     model       text      not null,

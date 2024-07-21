@@ -2,7 +2,7 @@ package ru.tolstykh.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 import ru.tolstykh.repository.CarMechanicRepository;
 
 import java.sql.Connection;

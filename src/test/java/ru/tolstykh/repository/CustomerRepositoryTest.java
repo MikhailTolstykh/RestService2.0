@@ -1,213 +1,158 @@
 package ru.tolstykh.repository;
 
-import org.junit.Before;
-import org.junit.After;
-import org.junit.Test;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
+import ru.tolstykh.entity.Customer;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import java.sql.Statement;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+@Testcontainers
 public class CustomerRepositoryTest {
+    private static CustomerRepository customerRepository;
+    private static DataSource dataSource;
 
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/myDataBase";
-    private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "postgres";
-    private Connection connection;
+    @Container
+    public static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test")
+            .withExposedPorts(5432);
 
-    @Before
-    public void setUp() throws SQLException {
-        // Установление соединения с базой данных
-        connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-        Statement statement = connection.createStatement();
+    @BeforeAll
+    static void beforeAll() {
+        postgresContainer.start();
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(postgresContainer.getJdbcUrl());
+        config.setUsername(postgresContainer.getUsername());
+        config.setPassword(postgresContainer.getPassword());
+        config.setDriverClassName("org.postgresql.Driver");
 
-        // Создание таблицы, если ее нет
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS car_service.customer1 ("
-                + "id SERIAL PRIMARY KEY, "
-                + "name VARCHAR(100), "
-                + "email VARCHAR(100) UNIQUE);";
-        statement.execute(createTableSQL);
+        System.out.println("Настроили переменные");
 
-        // Очистка таблицы перед тестами
-        String truncateTableSQL = "TRUNCATE TABLE car_service.customer1 RESTART IDENTITY CASCADE;";
-        statement.execute(truncateTableSQL);
+        dataSource = new HikariDataSource(config);
+        customerRepository = new CustomerRepository(postgresContainer.getJdbcUrl(),
+                postgresContainer.getUsername(),
+                postgresContainer.getPassword());
+        System.out.println("репозиторий подключился");
+
+        createTables();
     }
 
-    @After
-    public void tearDown() throws SQLException {
-        // Очистка и закрытие соединения
-        Statement statement = connection.createStatement();
-        String dropTableSQL = "DROP TABLE IF EXISTS car_service.customer1;";
-        statement.execute(dropTableSQL);
-        connection.close();
-    }
 
-    @Test
-    public void testAddCustomer() throws SQLException {
-        // Данные для добавления
-        String name = "John Doe";
-        String email = "john.doe@example.com";
-
-        // Добавление клиента
-        String insertSQL = "INSERT INTO car_service.customer1 (name, email) VALUES (?, ?);";
-        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, email);
-            pstmt.executeUpdate();
-        }
-
-        // Проверка, что клиент был добавлен
-        String selectSQL = "SELECT * FROM car_service.customer1 WHERE email = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(selectSQL)) {
-            pstmt.setString(1, email);
-            ResultSet rs = pstmt.executeQuery();
-            assertTrue(rs.next());
-            assertEquals(name, rs.getString("name"));
-            assertEquals(email, rs.getString("email"));
+    @BeforeEach
+    void cleanUp() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            // Удаление всех записей из таблицы
+            statement.execute("TRUNCATE TABLE customer RESTART IDENTITY CASCADE;");
         }
     }
 
-    @Test
-    public void testGetCustomerById() throws SQLException {
-        // Данные для добавления
-        String name = "Jane Doe";
-        String email = "jane.doe@example.com";
 
-        // Добавление клиента
-        String insertSQL = "INSERT INTO car_service.customer1 (name, email) VALUES (?, ?) RETURNING id;";
-        int id;
-        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, email);
-            ResultSet rs = pstmt.executeQuery();
-            rs.next();
-            id = rs.getInt("id");
-        }
 
-        // Проверка получения клиента по ID
-        String selectSQL = "SELECT * FROM car_service.customer1 WHERE id = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(selectSQL)) {
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            assertTrue(rs.next());
-            assertEquals(name, rs.getString("name"));
-            assertEquals(email, rs.getString("email"));
-        }
-    }
 
-    @Test
-    public void testGetCustomerByInvalidId() throws SQLException {
-        // Проверка получения клиента по несуществующему ID
-        String selectSQL = "SELECT * FROM car_service.customer1 WHERE id = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(selectSQL)) {
-            pstmt.setInt(1, -1); // Не существующий ID
-            ResultSet rs = pstmt.executeQuery();
-            assertFalse(rs.next());
-        }
-    }
 
-    @Test
-    public void testUpdateCustomer() throws SQLException {
-        // Данные для добавления
-        String name = "Alice Smith";
-        String email = "alice.smith@example.com";
-        String newName = "Alice Johnson";
+    private static void createTables() {
 
-        // Добавление клиента
-        String insertSQL = "INSERT INTO car_service.customer1 (name, email) VALUES (?, ?) RETURNING id;";
-        int id;
-        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, email);
-            ResultSet rs = pstmt.executeQuery();
-            rs.next();
-            id = rs.getInt("id");
-        }
+        String createCustomerTableSQL = """
+                                CREATE TABLE IF NOT EXISTS customer
+                                (
+                                id BIGSERIAL NOT NULL PRIMARY KEY,
+                                name TEXT NOT NULL,
+                                email TEXT NOT NULL
+                                );
 
-        // Обновление данных клиента
-        String updateSQL = "UPDATE car_service.customer1 SET name = ? WHERE id = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
-            pstmt.setString(1, newName);
-            pstmt.setInt(2, id);
-            pstmt.executeUpdate();
-        }
+                """;
 
-        // Проверка обновленных данных
-        String selectSQL = "SELECT * FROM car_service.customer1 WHERE id = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(selectSQL)) {
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            assertTrue(rs.next());
-            assertEquals(newName, rs.getString("name"));
-            assertEquals(email, rs.getString("email"));
-        }
-    }
+        String createCarTableSQL = """
+                CREATE TABLE IF NOT EXISTS car
+                (id BIGSERIAL NOT NULL PRIMARY KEY,
+                model TEXT NOT NULL,
+                customer_id BIGINT NOT NULL);
+                """;
 
-    @Test
-    public void testDeleteCustomer() throws SQLException {
-        // Данные для добавления
-        String name = "Bob Brown";
-        String email = "bob.brown@example.com";
+        String insertCustomerTableSQL = "INSERT INTO customer (name,email) VALUES ('lada', 'example@example.com')";
 
-        // Добавление клиента
-        String insertSQL = "INSERT INTO car_service.customer1 (name, email) VALUES (?, ?) RETURNING id;";
-        int id;
-        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, email);
-            ResultSet rs = pstmt.executeQuery();
-            rs.next();
-            id = rs.getInt("id");
-        }
-
-        // Удаление клиента
-        String deleteSQL = "DELETE FROM car_service.customer1 WHERE id = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(deleteSQL)) {
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-        }
-
-        // Проверка удаления клиента
-        String selectSQL = "SELECT * FROM car_service.customer1 WHERE id = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(selectSQL)) {
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            assertFalse(rs.next());
-        }
-    }
-
-    @Test
-    public void testAddCustomerWithDuplicateEmail() throws SQLException {
-        // Данные для добавления
-        String name1 = "Charlie Green";
-        String email = "charlie.green@example.com";
-        String name2 = "David Blue";
-
-        // Добавление клиента
-        String insertSQL = "INSERT INTO car_service.customer1 (name, email) VALUES (?, ?);";
-        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
-            pstmt.setString(1, name1);
-            pstmt.setString(2, email);
-            pstmt.executeUpdate();
-        }
-
-        // Попытка добавить клиента с дублирующимся email
-        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
-            pstmt.setString(1, name2);
-            pstmt.setString(2, email);
-            pstmt.executeUpdate(); // Ожидается, что произойдет ошибка
-            // Поскольку ожидание ошибки может быть специфичным для вашей реализации,
-            // вы можете использовать проверку SQLException или специфичное поведение.
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.execute(createCarTableSQL);
+            statement.execute(createCustomerTableSQL);
+            statement.execute(insertCustomerTableSQL);
+            System.out.println("Таблицы созданы");
         } catch (SQLException e) {
-            // Проверка на исключение из-за дублирующегося email
-            assertTrue(e.getSQLState().startsWith("23505")); // Код ошибки для дублирующих записей в PostgreSQL
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка при создании таблиц", e);
         }
+    }
+    @Test
+    void shouldAddCustomer() throws SQLException {
+        Customer customer = new Customer("John Doe", "john.doe@example.com");
+        customerRepository.addCustomer(customer);
+
+        Customer fetchedCustomer = customerRepository.getCustomerById(1);
+        assertNotNull(fetchedCustomer);
+        assertEquals("John Doe", fetchedCustomer.getName());
+        assertEquals("john.doe@example.com", fetchedCustomer.getEmail());
+    }
+
+    @Test
+    void shouldGetCustomerById() throws SQLException {
+        Customer customer = new Customer("Jane Doe", "jane.doe@example.com");
+        customerRepository.addCustomer(customer);
+
+        Customer fetchedCustomer = customerRepository.getCustomerById(1);
+        assertNotNull(fetchedCustomer);
+        assertEquals("Jane Doe", fetchedCustomer.getName());
+        assertEquals("jane.doe@example.com", fetchedCustomer.getEmail());
+    }
+
+    @Test
+    void shouldUpdateCustomer() throws SQLException {
+        Customer customer = new Customer("Initial Name", "initial@example.com");
+        customerRepository.addCustomer(customer);
+
+        Customer updatedCustomer = new Customer(1, "Updated Name", "updated@example.com");
+        customerRepository.updateCustomer(updatedCustomer);
+
+        Customer fetchedCustomer = customerRepository.getCustomerById(1);
+        assertNotNull(fetchedCustomer);
+        assertEquals("Updated Name", fetchedCustomer.getName());
+        assertEquals("updated@example.com", fetchedCustomer.getEmail());
+    }
+
+    @Test
+    void shouldDeleteCustomer() throws SQLException {
+        Customer customer = new Customer("To Be Deleted", "tobedeleted@example.com");
+        customerRepository.addCustomer(customer);
+
+        customerRepository.deleteCustomer(1);
+
+        Customer fetchedCustomer = customerRepository.getCustomerById(1);
+        assertNull(fetchedCustomer);
+    }
+
+    @Test
+    void shouldGetAllCustomers() throws SQLException {
+        Customer customer1 = new Customer("Customer One", "customer1@example.com");
+        Customer customer2 = new Customer("Customer Two", "customer2@example.com");
+        customerRepository.addCustomer(customer1);
+        customerRepository.addCustomer(customer2);
+
+        List<Customer> customers = customerRepository.getAllCustomers();
+        assertNotNull(customers);
+        assertEquals(2, customers.size());
     }
 }

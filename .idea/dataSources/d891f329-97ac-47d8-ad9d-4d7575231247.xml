@@ -3,7 +3,7 @@
   <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.52">
     <root id="1">
       <DateStyle>dmy</DateStyle>
-      <IntrospectionStateNumber>2376</IntrospectionStateNumber>
+      <IntrospectionStateNumber>2619</IntrospectionStateNumber>
       <ServerVersion>16.3</ServerVersion>
       <StartupTime>1721483096</StartupTime>
       <TimeZones>true ACDT
@@ -800,7 +800,7 @@ false Zulu
 14643||10|C|G
 14643||-9223372036854775808|U|G
 14643||10|U|G</Grants>
-      <IntrospectionStateNumber>2376</IntrospectionStateNumber>
+      <IntrospectionStateNumber>2619</IntrospectionStateNumber>
       <ObjectId>24576</ObjectId>
       <OwnerName>postgres</OwnerName>
     </database>
@@ -4220,8 +4220,8 @@ false Zulu
       <ValidatorSchema>pg_catalog</ValidatorSchema>
     </language>
     <schema id="262" parent="2" name="car_service">
-      <IntrospectionStateNumber>2376</IntrospectionStateNumber>
-      <LastIntrospectionLocalTimestamp>2024-07-20.14:26:53</LastIntrospectionLocalTimestamp>
+      <IntrospectionStateNumber>2619</IntrospectionStateNumber>
+      <LastIntrospectionLocalTimestamp>2024-07-20.18:15:29</LastIntrospectionLocalTimestamp>
       <ObjectId>52101</ObjectId>
       <StateNumber>2365</StateNumber>
       <OwnerName>postgres</OwnerName>
@@ -4240,8 +4240,8 @@ false Zulu
     <schema id="265" parent="2" name="public">
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <IntrospectionStateNumber>2376</IntrospectionStateNumber>
-      <LastIntrospectionLocalTimestamp>2024-07-20.14:26:53</LastIntrospectionLocalTimestamp>
+      <IntrospectionStateNumber>2619</IntrospectionStateNumber>
+      <LastIntrospectionLocalTimestamp>2024-07-20.18:15:29</LastIntrospectionLocalTimestamp>
       <ObjectId>2200</ObjectId>
       <StateNumber>524</StateNumber>
       <OwnerName>pg_database_owner</OwnerName>
@@ -7623,13 +7623,27 @@ false Zulu
       <StateNumber>2366</StateNumber>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <table id="512" parent="262" name="car">
+    <sequence id="512" parent="262" name="customer_id_seq">
+      <DasType>integer|0s</DasType>
+      <ObjectId>52119</ObjectId>
+      <SequenceIdentity>1</SequenceIdentity>
+      <StartValue>1</StartValue>
+      <StateNumber>2384</StateNumber>
+      <OwnerName>postgres</OwnerName>
+    </sequence>
+    <table id="513" parent="262" name="car">
       <ObjectId>52103</ObjectId>
       <StateNumber>2368</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <sequence id="513" parent="265" name="car_id_seq">
+    <table id="514" parent="262" name="customer">
+      <ObjectId>52120</ObjectId>
+      <StateNumber>2384</StateNumber>
+      <AccessMethodId>2</AccessMethodId>
+      <OwnerName>postgres</OwnerName>
+    </table>
+    <sequence id="515" parent="265" name="car_id_seq">
       <DasType>integer|0s</DasType>
       <ObjectId>49168</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
@@ -7637,7 +7651,15 @@ false Zulu
       <StateNumber>794</StateNumber>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="514" parent="265" name="mechanic_id_seq">
+    <sequence id="516" parent="265" name="customer_id_seq">
+      <DasType>integer|0s</DasType>
+      <ObjectId>52128</ObjectId>
+      <SequenceIdentity>1</SequenceIdentity>
+      <StartValue>1</StartValue>
+      <StateNumber>2385</StateNumber>
+      <OwnerName>postgres</OwnerName>
+    </sequence>
+    <sequence id="517" parent="265" name="mechanic_id_seq">
       <DasType>integer|0s</DasType>
       <ObjectId>49161</ObjectId>
       <SequenceIdentity>1</SequenceIdentity>
@@ -7645,25 +7667,31 @@ false Zulu
       <StateNumber>792</StateNumber>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <table id="515" parent="265" name="car">
+    <table id="518" parent="265" name="car">
       <ObjectId>49169</ObjectId>
       <StateNumber>797</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="516" parent="265" name="car_mechanic">
+    <table id="519" parent="265" name="car_mechanic">
       <ObjectId>52111</ObjectId>
       <StateNumber>2368</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="517" parent="265" name="mechanic">
+    <table id="520" parent="265" name="customer">
+      <ObjectId>52129</ObjectId>
+      <StateNumber>2385</StateNumber>
+      <AccessMethodId>2</AccessMethodId>
+      <OwnerName>postgres</OwnerName>
+    </table>
+    <table id="521" parent="265" name="mechanic">
       <ObjectId>49162</ObjectId>
       <StateNumber>797</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <column id="518" parent="512" name="id">
+    <column id="522" parent="513" name="id">
       <DasType>bigint|0s</DasType>
       <DefaultExpression>nextval(&apos;car_service.car_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
@@ -7672,21 +7700,21 @@ false Zulu
       <SequenceId>52102</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="519" parent="512" name="model">
+    <column id="523" parent="513" name="model">
       <DasType>text|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StateNumber>2366</StateNumber>
       <TypeId>25</TypeId>
     </column>
-    <column id="520" parent="512" name="customer_id">
+    <column id="524" parent="513" name="customer_id">
       <DasType>bigint|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StateNumber>2366</StateNumber>
       <TypeId>20</TypeId>
     </column>
-    <index id="521" parent="512" name="car_pkey">
+    <index id="525" parent="513" name="car_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>52109</ObjectId>
@@ -7695,14 +7723,51 @@ false Zulu
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="522" parent="512" name="car_pkey">
+    <key id="526" parent="513" name="car_pkey">
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>52110</ObjectId>
       <Primary>1</Primary>
       <StateNumber>2366</StateNumber>
       <UnderlyingIndexId>52109</UnderlyingIndexId>
     </key>
-    <column id="523" parent="515" name="id">
+    <column id="527" parent="514" name="id">
+      <DasType>integer|0s</DasType>
+      <DefaultExpression>nextval(&apos;car_service.customer_id_seq&apos;::regclass)</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StateNumber>2384</StateNumber>
+      <SequenceId>52119</SequenceId>
+      <TypeId>23</TypeId>
+    </column>
+    <column id="528" parent="514" name="name">
+      <DasType>varchar(255)|0s</DasType>
+      <Position>2</Position>
+      <StateNumber>2384</StateNumber>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="529" parent="514" name="email">
+      <DasType>varchar(255)|0s</DasType>
+      <Position>3</Position>
+      <StateNumber>2384</StateNumber>
+      <TypeId>1043</TypeId>
+    </column>
+    <index id="530" parent="514" name="customer_pkey">
+      <ColNames>id</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>52126</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>2384</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <key id="531" parent="514" name="customer_pkey">
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>52127</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>2384</StateNumber>
+      <UnderlyingIndexId>52126</UnderlyingIndexId>
+    </key>
+    <column id="532" parent="518" name="id">
       <DasType>integer|0s</DasType>
       <DefaultExpression>nextval(&apos;car_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
@@ -7711,21 +7776,21 @@ false Zulu
       <SequenceId>49168</SequenceId>
       <TypeId>23</TypeId>
     </column>
-    <column id="524" parent="515" name="model">
+    <column id="533" parent="518" name="model">
       <DasType>varchar(255)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StateNumber>794</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="525" parent="515" name="customer_id">
+    <column id="534" parent="518" name="customer_id">
       <DasType>integer|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StateNumber>794</StateNumber>
       <TypeId>23</TypeId>
     </column>
-    <index id="526" parent="515" name="car_pkey">
+    <index id="535" parent="518" name="car_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>49173</ObjectId>
@@ -7734,26 +7799,26 @@ false Zulu
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="527" parent="515" name="car_pkey">
+    <key id="536" parent="518" name="car_pkey">
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>49174</ObjectId>
       <Primary>1</Primary>
       <StateNumber>794</StateNumber>
       <UnderlyingIndexId>49173</UnderlyingIndexId>
     </key>
-    <column id="528" parent="516" name="car_id">
+    <column id="537" parent="519" name="car_id">
       <DasType>integer|0s</DasType>
       <Position>1</Position>
       <StateNumber>2368</StateNumber>
       <TypeId>23</TypeId>
     </column>
-    <column id="529" parent="516" name="mechanic_id">
+    <column id="538" parent="519" name="mechanic_id">
       <DasType>integer|0s</DasType>
       <Position>2</Position>
       <StateNumber>2368</StateNumber>
       <TypeId>23</TypeId>
     </column>
-    <foreign-key id="530" parent="516" name="car_mechanic_car_id_fkey">
+    <foreign-key id="539" parent="519" name="car_mechanic_car_id_fkey">
       <ColNames>car_id</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>52114</ObjectId>
@@ -7765,7 +7830,44 @@ false Zulu
       <RefTableKind>table</RefTableKind>
       <RefTableParentName>car_service</RefTableParentName>
     </foreign-key>
-    <column id="531" parent="517" name="id">
+    <column id="540" parent="520" name="id">
+      <DasType>integer|0s</DasType>
+      <DefaultExpression>nextval(&apos;customer_id_seq&apos;::regclass)</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StateNumber>2385</StateNumber>
+      <SequenceId>52128</SequenceId>
+      <TypeId>23</TypeId>
+    </column>
+    <column id="541" parent="520" name="name">
+      <DasType>varchar(255)|0s</DasType>
+      <Position>2</Position>
+      <StateNumber>2385</StateNumber>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="542" parent="520" name="email">
+      <DasType>varchar(255)|0s</DasType>
+      <Position>3</Position>
+      <StateNumber>2385</StateNumber>
+      <TypeId>1043</TypeId>
+    </column>
+    <index id="543" parent="520" name="customer_pkey">
+      <ColNames>id</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>52135</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>2385</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <key id="544" parent="520" name="customer_pkey">
+      <NameSurrogate>1</NameSurrogate>
+      <ObjectId>52136</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>2385</StateNumber>
+      <UnderlyingIndexId>52135</UnderlyingIndexId>
+    </key>
+    <column id="545" parent="521" name="id">
       <DasType>integer|0s</DasType>
       <DefaultExpression>nextval(&apos;mechanic_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
@@ -7774,14 +7876,14 @@ false Zulu
       <SequenceId>49161</SequenceId>
       <TypeId>23</TypeId>
     </column>
-    <column id="532" parent="517" name="name">
+    <column id="546" parent="521" name="name">
       <DasType>varchar(255)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StateNumber>792</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <index id="533" parent="517" name="mechanic_pkey">
+    <index id="547" parent="521" name="mechanic_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>49166</ObjectId>
@@ -7790,7 +7892,7 @@ false Zulu
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="534" parent="517" name="mechanic_pkey">
+    <key id="548" parent="521" name="mechanic_pkey">
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>49167</ObjectId>
       <Primary>1</Primary>

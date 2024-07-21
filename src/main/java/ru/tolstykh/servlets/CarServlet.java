@@ -19,7 +19,9 @@ import java.util.stream.Collectors;
 @WebServlet(name="CarServlet",urlPatterns = "/car/*")
 public class CarServlet extends HttpServlet {
     private CarServiceInterface carService;
-
+    public CarServlet() {
+        super();
+    }
     @Override
     public void init() throws ServletException {
         carService = new CarService(); // Инициализируем CarService

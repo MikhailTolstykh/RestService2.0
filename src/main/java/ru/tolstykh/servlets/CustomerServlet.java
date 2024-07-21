@@ -21,7 +21,9 @@ public class CustomerServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        CustomerRepository customerRepository = new CustomerRepository();
+        CustomerRepository customerRepository = new CustomerRepository("postgres://localhost:5432/testdb",
+                "test",
+                "test");
         customerService = new CustomerService(customerRepository);
     }
 

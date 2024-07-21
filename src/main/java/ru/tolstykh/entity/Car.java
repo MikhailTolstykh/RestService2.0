@@ -9,8 +9,6 @@ public class Car {
     private int customerId;
     private List<Mechanic> mechanics;
 
-    public Car(String s, int id) {
-    }
 
     public List<Mechanic> getMechanics() {
         return mechanics;
@@ -20,6 +18,12 @@ public class Car {
         this.mechanics = mechanics;
     }
 
+
+
+    public Car(String model, int customerId) {
+        this.model = model;
+        this.customerId = customerId;
+    }
     public Car() {
 
     }

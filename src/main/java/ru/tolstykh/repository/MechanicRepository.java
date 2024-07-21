@@ -10,6 +10,10 @@ import java.util.List;
 
 public class MechanicRepository implements MechanicInterface {
 
+
+
+
+
     private String URL = DatabaseConfig.getProperty("db.url");
     private String Username = DatabaseConfig.getProperty("db.username");
     private String Password = DatabaseConfig.getProperty("db.password");
@@ -91,7 +95,8 @@ public class MechanicRepository implements MechanicInterface {
             while (resultSet.next()) {
                 int mechanicId = resultSet.getInt("id");
                 String name = resultSet.getString("name");
-                Mechanic mechanic = new Mechanic(mechanicId, name); // cars will be fetched separately
+                System.out.println("Получен механик: ID=" + mechanicId + ", Name=" + name); // Логирование
+                Mechanic mechanic = new Mechanic(mechanicId, name);
                 mechanics.add(mechanic);
             }
         }

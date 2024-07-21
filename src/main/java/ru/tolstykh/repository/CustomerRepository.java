@@ -8,54 +8,41 @@ import java.util.List;
 
 public class CustomerRepository implements CustomerInterface {
 
-    private String URL;
-    private String Username;
-    private String Password;
+    private String url;
+    private String username;
+    private String password;
 
-    private static final String INSERT_CUSTOMERS_SQL = "INSERT INTO car_service.customer1 (name, email) VALUES (?, ?);";
-    private static final String SELECT_CUSTOMER_BY_ID = "SELECT id, name, email FROM car_service.customer1 WHERE id = ?;";
-    private static final String SELECT_ALL_CUSTOMERS = "SELECT * FROM car_service.customer1;";
-    private static final String DELETE_CUSTOMERS_SQL = "DELETE FROM car_service.customer1 WHERE id = ?;";
-    private static final String UPDATE_CUSTOMERS_SQL = "UPDATE car_service.customer1 SET name = ?, email = ? WHERE id = ?;";
+    private static final String INSERT_CUSTOMERS_SQL = "INSERT INTO customer (name, email) VALUES (?, ?);";
+    private static final String SELECT_CUSTOMER_BY_ID = "SELECT id, name, email FROM customer WHERE id = ?;";
+    private static final String SELECT_ALL_CUSTOMERS = "SELECT * FROM customer;";
+    private static final String DELETE_CUSTOMERS_SQL = "DELETE FROM customer WHERE id = ?;";
+    private static final String UPDATE_CUSTOMERS_SQL = "UPDATE customer SET name = ?, email = ? WHERE id = ?;";
 
-    public CustomerRepository() {
-    }
-
-    // Конструктор по умолчанию
     public CustomerRepository(String jdbcUrl, String username, String password) {
-        this.URL = DatabaseConfig.getProperty("db.url");
-        this.Username = DatabaseConfig.getProperty("db.username");
-        this.Password = DatabaseConfig.getProperty("db.password");
+        this.url = jdbcUrl;
+        this.username = username;
+        this.password = password;
 
-
-
-
-
-        // Проверка загруженных значений
-        System.out.println("DB URL: " + URL);
-        System.out.println("DB Username: " + Username);
-        System.out.println("DB Password: " + Password);
-
-        if (URL == null || Username == null || Password == null) {
+        if (url == null || username == null || password == null) {
             throw new RuntimeException("Database configuration is missing. URL, Username, or Password is null.");
         }
     }
 
-
-
     protected Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, Username, Password);
+        return DriverManager.getConnection(url, username, password);
     }
 
+    @Override
     public void addCustomer(Customer customer) throws SQLException {
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CUSTOMERS_SQL)) {
             preparedStatement.setString(1, customer.getName());
             preparedStatement.setString(2, customer.getEmail());
-            preparedStatement.executeUpdate(); // Убедитесь, что вызов executeUpdate()
+            preparedStatement.executeUpdate();
         }
     }
 
+    @Override
     public Customer getCustomerById(int id) throws SQLException {
         Customer customer = null;
         try (Connection connection = getConnection();
@@ -72,6 +59,7 @@ public class CustomerRepository implements CustomerInterface {
         return customer;
     }
 
+    @Override
     public void updateCustomer(Customer customer) throws SQLException {
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CUSTOMERS_SQL)) {
@@ -82,6 +70,7 @@ public class CustomerRepository implements CustomerInterface {
         }
     }
 
+    @Override
     public void deleteCustomer(int id) throws SQLException {
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CUSTOMERS_SQL)) {
@@ -90,6 +79,7 @@ public class CustomerRepository implements CustomerInterface {
         }
     }
 
+    @Override
     public List<Customer> getAllCustomers() throws SQLException {
         List<Customer> customers = new ArrayList<>();
         try (Connection connection = getConnection();
