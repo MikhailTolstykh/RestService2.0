@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
@@ -130,4 +131,24 @@ class MechanicServletTest {
         verify(writer).write("{\"message\":\"Mechanic deleted successfully\"}");
         verify(mechanicService).deleteMechanic(1);
     }
+    @Test
+    void testDoGetWithSQLException() throws Exception {
+
+        when(request.getParameter("id")).thenReturn("1");
+
+
+        MechanicServiceInterface mechanicService = mock(MechanicServiceInterface.class);
+        when(mechanicService.getMechanicById(anyInt())).thenThrow(new SQLException("Database error"));
+
+
+        mechanicServlet.mechanicService = mechanicService;
+
+
+        mechanicServlet.doGet(request, response);
+
+
+        verify(writer).write("{\"error\":\"Database error\"}");
+        verify(writer).flush();  // Проверяем, что flush() был вызван
+    }
+
 }

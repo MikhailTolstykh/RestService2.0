@@ -112,7 +112,7 @@ public class MechanicRepositoryTest {
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             statement.execute(createMechanicTableSQL);
-           statement.execute(createCarTableSQL);
+            statement.execute(createCarTableSQL);
             statement.execute(createCarMechanicTableSQL);
             statement.execute(createCustomerTableSQL);
         } catch (SQLException e) {
@@ -170,11 +170,3 @@ public class MechanicRepositoryTest {
     }
 
 }
-
-
-
-
-
-
-
-

@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 public class CarRepositoryTest {
-    private static CarRepository carRepository;
+    protected static CarRepository carRepository;
     private static DataSource dataSource;
 
     @Container

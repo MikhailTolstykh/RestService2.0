@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @WebServlet(name="MechanicServlet ",urlPatterns = "/mechanic/*")
 public class MechanicServlet extends HttpServlet {
 
-    private MechanicServiceInterface mechanicService;
+    MechanicServiceInterface mechanicService;
 
     @Override
     public void init() throws ServletException {
@@ -51,10 +51,11 @@ public class MechanicServlet extends HttpServlet {
                         .collect(Collectors.joining(",", "[", "]"));
                 out.write(jsonArray);
             }
-            out.flush();
+            out.flush();  // Убедитесь, что это действительно вызывается
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.write("{\"error\":\"" + e.getMessage() + "\"}");
+            out.flush();  // И здесь тоже
         }
     }
 
