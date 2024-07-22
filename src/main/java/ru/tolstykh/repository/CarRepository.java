@@ -147,18 +147,26 @@ public class CarRepository implements CarInterface{
     }
 
     @Override
-    public  List<Mechanic> getMechanicsByCarId(int CarId) throws SQLException {
+    public List<Mechanic> getMechanicsByCarId(int carId) throws SQLException {
         List<Mechanic> mechanics = new ArrayList<>();
+        String sql = "SELECT m.id, m.name FROM mechanic m " +
+                "INNER JOIN car_mechanic cm ON m.id = cm.mechanic_id " +
+                "WHERE cm.car_id = ?";
+
         try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_MECHANICS_BY_CAR_ID)) {
-            preparedStatement.setInt(1, CarId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            MechanicRepository mechanicRepository = new MechanicRepository();
-            while (resultSet.next()) {
-                int mechanicId = resultSet.getInt("mechanic_id");
-                Mechanic mechanic = mechanicRepository.getMechanicById(mechanicId);
-                mechanics.add(mechanic);
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, carId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Mechanic mechanic = new Mechanic();
+                    mechanic.setId(resultSet.getInt("id"));
+                    mechanic.setName(resultSet.getString("name"));
+                    mechanics.add(mechanic);
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка при выполнении запроса getMechanicsByCarId", e);
         }
         return mechanics;
     }

@@ -10,9 +10,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import ru.tolstykh.entity.Car;
+import ru.tolstykh.entity.Mechanic;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -78,10 +80,31 @@ public class CarRepositoryTest {
                 );
                 """;
 
+
+        String createMechanicTableSQL = """
+                CREATE TABLE IF NOT EXISTS mechanic
+                (
+                id BIGSERIAL NOT NULL PRIMARY KEY,
+                name TEXT NOT NULL
+                );
+                """;
+
+        String createCarMechanicTableSQL = """
+                CREATE TABLE IF NOT EXISTS car_mechanic
+                (
+                car_id BIGINT NOT NULL REFERENCES car(id),
+                mechanic_id BIGINT NOT NULL REFERENCES mechanic(id),
+                PRIMARY KEY (car_id, mechanic_id)
+                );
+                """;
+
+
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             statement.execute(createCustomerTableSQL);
             statement.execute(createCarTableSQL);
+            statement.execute(createMechanicTableSQL);
+            statement.execute(createCarMechanicTableSQL);
             System.out.println("Таблицы созданы");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -227,4 +250,71 @@ public class CarRepositoryTest {
         assertNotNull(cars);
         assertEquals(2, cars.size(), "Expected 2 cars in the list.");
     }
+
+
+    @Test
+    void shouldGetMechanicsByCarId() throws SQLException {
+        // Добавляем клиента для связи с машиной
+        String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('John Doe', 'john.doe@example.com') RETURNING id;";
+        int customerId;
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet = statement.executeQuery(insertCustomerSQL);
+            if (resultSet.next()) {
+                customerId = resultSet.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID клиента после вставки");
+            }
+        }
+
+        // Добавляем машину
+        Car car = new Car("Toyota Camry", customerId);
+        carRepository.addCar(car);
+
+        // Добавляем механиков
+        String insertMechanic1SQL = "INSERT INTO mechanic (name) VALUES ('Mechanic One') RETURNING id;";
+        String insertMechanic2SQL = "INSERT INTO mechanic (name) VALUES ('Mechanic Two') RETURNING id;";
+        int mechanicId1;
+        int mechanicId2;
+
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet1 = statement.executeQuery(insertMechanic1SQL);
+            if (resultSet1.next()) {
+                mechanicId1 = resultSet1.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID механика после вставки");
+            }
+
+            var resultSet2 = statement.executeQuery(insertMechanic2SQL);
+            if (resultSet2.next()) {
+                mechanicId2 = resultSet2.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID механика после вставки");
+            }
+        }
+
+        // Связываем машину и механиков
+        String insertCarMechanic1SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, ?);";
+        String insertCarMechanic2SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, ?);";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement1 = connection.prepareStatement(insertCarMechanic1SQL);
+             PreparedStatement preparedStatement2 = connection.prepareStatement(insertCarMechanic2SQL)) {
+            preparedStatement1.setInt(1, mechanicId1);
+            preparedStatement1.executeUpdate();
+            preparedStatement2.setInt(1, mechanicId2);
+            preparedStatement2.executeUpdate();
+        }
+
+        // Проверяем, что метод возвращает корректный список механиков
+        List<Mechanic> mechanics = carRepository.getMechanicsByCarId(1);
+        assertNotNull(mechanics);
+        assertEquals(2, mechanics.size(), "Expected 2 mechanics in the list.");
+        assertTrue(mechanics.stream().anyMatch(mechanic -> mechanic.getName().equals("Mechanic One")), "Expected 'Mechanic One' in the list.");
+        assertTrue(mechanics.stream().anyMatch(mechanic -> mechanic.getName().equals("Mechanic Two")), "Expected 'Mechanic Two' in the list.");
+    }
 }
+
+
+
