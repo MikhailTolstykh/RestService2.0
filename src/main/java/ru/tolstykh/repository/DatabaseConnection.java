@@ -16,20 +16,21 @@ public final class DatabaseConnection {
 
     public static Connection getConnectionToDataBase() throws SQLException, ClassNotFoundException {
         Properties props = new Properties();
-//        try (InputStream input = Files.newInputStream(Paths.get("src/main/resources/database.properties"))) {
-        try (InputStream input = Files.newInputStream(Paths.get(" C:\\Users\\User\\IdeaProjects\\RestService\\target\\classes\\database.property"))) {
+        try (InputStream input = Files.newInputStream(Paths.get("src/main/resources/database.properties"))) {
             props.load(input);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to load database properties file", e);
         }
-        final String url = props.getProperty("url");
-        final String username = props.getProperty("username");
-        final String password = props.getProperty("password");
+
+        final String url = props.getProperty("db.url");
+        final String username = props.getProperty("db.username");
+        final String password = props.getProperty("db.password");
+
+        if (url == null || username == null || password == null) {
+            throw new RuntimeException("Missing database configuration properties");
+        }
+
         Class.forName("org.postgresql.Driver");
-//        final String url = "jdbc:postgresql://localhost:5432/aston-dev-test";
-//        final String username = "postgres";
-//        final String password = "password";
         return DriverManager.getConnection(url, username, password);
     }
-
 }
