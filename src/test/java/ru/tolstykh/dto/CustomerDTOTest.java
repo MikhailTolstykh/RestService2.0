@@ -29,14 +29,14 @@ public class CustomerDTOTest {
         cars.add(car1);
         cars.add(car2);
 
-        // Создание тестовой сущности Customer
+
         Customer customer = new Customer();
         customer.setId(1);
         customer.setName("John Doe");
         customer.setEmail("john.doe@example.com");
         customer.setCars(cars);
 
-        // Преобразование Customer в CustomerDTO
+
         CustomerDTO dto = CustomerDTO.fromEntity(customer);
 
         // Проверка значений в CustomerDTO
@@ -46,7 +46,7 @@ public class CustomerDTOTest {
         assertNotNull(dto.getCars());
         assertEquals(2, dto.getCars().size());
 
-        // Проверка значений в CarDTO внутри CustomerDTO
+
         CarDTO carDTO1 = dto.getCars().get(0);
         assertEquals(1, carDTO1.getId());
         assertEquals("Tesla Model S", carDTO1.getModel());
@@ -82,17 +82,17 @@ public class CustomerDTOTest {
         dto.setEmail("john.doe@example.com");
         dto.setCars(carDTOs);
 
-        // Преобразование CustomerDTO в Customer
+
         Customer customer = CustomerDTO.toEntity(dto);
 
-        // Проверка значений в Customer
+
         assertEquals(1, customer.getId());
         assertEquals("John Doe", customer.getName());
         assertEquals("john.doe@example.com", customer.getEmail());
         assertNotNull(customer.getCars());
         assertEquals(2, customer.getCars().size());
 
-        // Проверка значений в Car внутри Customer
+
         Car car1 = customer.getCars().get(0);
         assertEquals(1, car1.getId());
         assertEquals("Tesla Model S", car1.getModel());

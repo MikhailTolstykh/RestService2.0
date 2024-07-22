@@ -4,7 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -18,7 +18,7 @@ import java.sql.*;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.tolstykh.repository.CarRepositoryTest.createTables;
+
 
 
 @Testcontainers

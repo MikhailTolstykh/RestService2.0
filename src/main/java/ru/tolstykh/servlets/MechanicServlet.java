@@ -7,6 +7,7 @@ import ru.tolstykh.service.MechanicService;
 import ru.tolstykh.service.MechanicServiceInterface;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +17,7 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
-
+@WebServlet(name="MechanicServlet ",urlPatterns = "/mechanic/*")
 public class MechanicServlet extends HttpServlet {
 
     private MechanicServiceInterface mechanicService;

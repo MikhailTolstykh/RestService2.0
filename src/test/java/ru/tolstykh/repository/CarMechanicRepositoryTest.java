@@ -108,7 +108,7 @@ public class CarMechanicRepositoryTest {
 
     @Test
     void GetCarsByMechanicId() throws SQLException {
-        // Insert test data
+
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             statement.execute("INSERT INTO car (model, customer_id) VALUES ('Model S', 1), ('Model 3', 2);");
@@ -116,7 +116,7 @@ public class CarMechanicRepositoryTest {
             statement.execute("INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, 1), (2, 1);");
         }
 
-        // Use a new connection to test the repository method
+
         try (Connection connection = dataSource.getConnection()) {
             carMechanicRepository = new CarMechanicRepository(connection);
 

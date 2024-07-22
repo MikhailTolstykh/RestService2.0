@@ -106,7 +106,7 @@ class CarServletTest {
 
     @Test
     void testDoPut() throws Exception {
-        // Setup
+
         String carJson = "{\"id\":1,\"model\":\"Toyota\",\"customerId\":2}";
         CarDTO carDTO = new CarDTO();
         carDTO.setId(1);
@@ -125,13 +125,13 @@ class CarServletTest {
 
     @Test
     void testDoDelete() throws Exception {
-        // Setup
+
         when(request.getParameter("id")).thenReturn("1");
 
-        // Execute
+
         carServlet.doDelete(request, response);
 
-        // Verify
+
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(writer).write("{\"message\":\"Car deleted successfully\"}");
         verify(carService).deleteCar(1);

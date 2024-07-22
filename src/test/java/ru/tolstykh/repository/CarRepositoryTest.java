@@ -89,7 +89,7 @@ public class CarRepositoryTest {
         }
     }
 
-  /*  @Test
+    @Test
     void shouldAddCar() throws SQLException {
         // Добавляем клиента для связи с машиной
         String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('John Doe', 'john.doe@example.com') RETURNING id;";
@@ -116,7 +116,7 @@ public class CarRepositoryTest {
         assertEquals(customerId, fetchedCar.getCustomerId());
     }
 
-   */
+
 
     @Test
     void shouldGetCarById() throws SQLException {
