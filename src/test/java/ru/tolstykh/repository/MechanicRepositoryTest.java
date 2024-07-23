@@ -168,5 +168,37 @@ public class MechanicRepositoryTest {
         assertEquals("John Doe", mechanics.get(0).getName(), "Имя первого механика не совпадает.");
         assertEquals("Jane Doe", mechanics.get(1).getName(), "Имя второго механика не совпадает.");
     }
+    @Test
+    void shouldGetMechanicsByCarId() throws SQLException {
 
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+
+            statement.execute("INSERT INTO mechanic (name) VALUES ('John Doe');");
+            statement.execute("INSERT INTO mechanic (name) VALUES ('Jane Doe');");
+            statement.execute("INSERT INTO car (model, customer_id) VALUES ('Model X', 1);");
+            statement.execute("INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, 1);");
+            statement.execute("INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, 2);");
+        }
+
+
+        List<Mechanic> mechanics = mechanicRepository.getMechanicsByCarId(1);
+
+
+        assertNotNull(mechanics, "Список механиков не должен быть null.");
+        assertEquals(2, mechanics.size(), "Неверное количество механиков.");
+        assertEquals("John Doe", mechanics.get(0).getName(), "Имя первого механика не совпадает.");
+        assertEquals("Jane Doe", mechanics.get(1).getName(), "Имя второго механика не совпадает.");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDatabaseConfigIsMissing() {
+        // Создаем репозиторий с отсутствующими параметрами для конфигурации базы данных
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            new MechanicRepository(null, null, null);
+        });
+
+        // Проверяем, что выбрасывается правильное исключение с правильным сообщением
+        assertTrue(exception.getMessage().contains("Database configuration is missing. URL, Username, or Password is null."));
+    }
 }

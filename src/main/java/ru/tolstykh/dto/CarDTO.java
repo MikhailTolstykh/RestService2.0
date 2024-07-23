@@ -8,8 +8,7 @@ public class CarDTO {
     private String model;
     private int customerId;
 
-    // Геттеры и сеттеры
-    // Остаются без изменений
+
 
     public int getId() {
         return id;

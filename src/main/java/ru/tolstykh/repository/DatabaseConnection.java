@@ -16,10 +16,10 @@ public final class DatabaseConnection {
 
     public static Connection getConnectionToDataBase() throws SQLException, ClassNotFoundException {
         Properties props = new Properties();
-        try (InputStream input = Files.newInputStream(Paths.get("src/main/resources/database.properties"))) {
+        try (InputStream input = Files.newInputStream(Paths.get("C:\\Users\\User\\IdeaProjects\\RestService2.0\\src\\main\\resources\\database.properties"))) {
             props.load(input);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load database properties file", e);
+            throw new RuntimeException("ошибка загрузки файла", e);
         }
 
         final String url = props.getProperty("db.url");

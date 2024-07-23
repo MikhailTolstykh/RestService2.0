@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -314,6 +315,28 @@ public class CarRepositoryTest {
         assertTrue(mechanics.stream().anyMatch(mechanic -> mechanic.getName().equals("Mechanic One")), "Expected 'Mechanic One' in the list.");
         assertTrue(mechanics.stream().anyMatch(mechanic -> mechanic.getName().equals("Mechanic Two")), "Expected 'Mechanic Two' in the list.");
     }
+    @Test
+    void shouldHandleSQLExceptionInGetMechanicsByCarId() throws SQLException {
+        // Мокируем CarRepository и Connection
+        CarRepository mockCarRepository = Mockito.spy(new CarRepository(postgresContainer.getJdbcUrl(),
+                postgresContainer.getUsername(), postgresContainer.getPassword()));
+        Connection mockConnection = Mockito.mock(Connection.class);
+        PreparedStatement mockPreparedStatement = Mockito.mock(PreparedStatement.class);
+
+
+        Mockito.doReturn(mockConnection).when(mockCarRepository).getConnection();
+        Mockito.when(mockConnection.prepareStatement(Mockito.anyString())).thenThrow(new SQLException("Test SQL Exception"));
+
+        // Проверяем, что метод выбрасывает RuntimeException с корректным сообщением
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            mockCarRepository.getMechanicsByCarId(1);
+        });
+
+        String expectedMessage = "Ошибка при выполнении запроса getMechanicsByCarId";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage), "Expected exception message to contain: " + expectedMessage);
+    }
+
 }
 
 
