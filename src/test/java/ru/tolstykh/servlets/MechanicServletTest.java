@@ -8,20 +8,17 @@ import org.mockito.MockitoAnnotations;
 import ru.tolstykh.dto.MechanicDTO;
 import ru.tolstykh.entity.Mechanic;
 import ru.tolstykh.service.MechanicServiceInterface;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static ru.tolstykh.repository.MechanicRepositoryTest.mechanicRepository;
+
+
+
 
 class MechanicServletTest {
     private StringWriter stringWriter;
@@ -86,12 +83,12 @@ class MechanicServletTest {
         BufferedReader reader = new BufferedReader(new StringReader(json));
         when(request.getReader()).thenReturn(reader);
 
-        // Mocking the conversion from JSON to DTO and entity
+
         MechanicDTO mechanicDTO = new MechanicDTO();
         mechanicDTO.setName("John Doe");
         Mechanic mechanic = mechanicDTO.toEntity();
 
-        // Mocking the behavior of the service to throw an SQLException
+
         doThrow(new SQLException("Database error")).when(mechanicService).addMechanic(any(Mechanic.class));
 
         try {
@@ -100,7 +97,7 @@ class MechanicServletTest {
             throw new RuntimeException(e);
         }
 
-        // Verify the response status and error message
+
         verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         verify(writer).write("{\"error\":\"Database error\"}");
     }
@@ -114,10 +111,10 @@ class MechanicServletTest {
         mechanic.setName("John Doe");
         when(mechanicService.getMechanicById(1)).thenReturn(mechanic);
 
-        // Execute
+
         mechanicServlet.doGet(request, response);
 
-        // Verify
+
         verify(response).setContentType("application/json");
         verify(writer).write("{\"id\":1,\"name\":\"John Doe\"}");
         verify(writer).flush();
@@ -193,28 +190,27 @@ class MechanicServletTest {
 
     @Test
     void testHandleBadRequest() throws IOException {
-        // Arrange
+
         String errorMessage = "{\"error\":\"Mechanic ID is required\"}";
 
-        // Act
+
         mechanicServlet.handleBadRequest(response, errorMessage);
 
-        // Assert
         verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        verify(response).setContentType("application/json"); // Проверяем установку типа контента
+        verify(response).setContentType("application/json");
         verify(writer).write(errorMessage);
-        verify(writer).flush(); // Проверяем, что flush() был вызван
+        verify(writer).flush();
     }
 
     @Test
     void testHandleInternalServerError() throws IOException {
-        // Arrange
+
         String errorMessage = "Database error";
 
-        // Act
+
         mechanicServlet.handleInternalServerError(response, errorMessage);
 
-        // Assert
+
         verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         verify(response).setContentType("application/json"); // Проверяем установку типа контента
         verify(writer).write("{\"error\":\"" + errorMessage + "\"}");
@@ -239,27 +235,60 @@ class MechanicServletTest {
 
 
         verify(writer).write("{\"error\":\"Database error\"}");
-        verify(writer).flush();  // Проверяем, что flush() был вызван
+        verify(writer).flush();
     }
 
 
 
     @Test
     void testDoDeleteWithNonExistentMechanic() throws Exception {
-        // Mocking the request parameter with an ID of a non-existent mechanic
+
         when(request.getParameter("id")).thenReturn("999");
         doThrow(new SQLException("Mechanic not found")).when(mechanicService).deleteMechanic(anyInt());
 
-        // Execute
+
         mechanicServlet.doDelete(request, response);
 
-        // Verify
+
         verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         verify(writer).write("{\"error\":\"Mechanic not found\"}");
     }
 
 
+    @Test
+    void testDoDeleteWithoutId() throws Exception {
+        // Параметр id отсутствует
+        when(request.getParameter("id")).thenReturn(null);
 
+
+        mechanicServlet.doDelete(request, response);
+
+
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        verify(response).setContentType("application/json");
+        verify(writer).write("{\"error\":\"Mechanic ID is required\"}");
+        verify(writer).flush();
+    }
+
+    @Test
+    void testDoDeleteWithValidId() throws Exception {
+
+        when(request.getParameter("id")).thenReturn("1");
+
+
+        mechanicServlet.doDelete(request, response);
+
+
+        verify(mechanicService).deleteMechanic(1);
+
+
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+        verify(writer).write("{\"message\":\"Mechanic deleted successfully\"}");
+        verify(writer).flush();
+    }
 
 
 }
+
+
+

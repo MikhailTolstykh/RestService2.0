@@ -112,8 +112,10 @@ public class MechanicServlet extends HttpServlet {
             mechanicService.deleteMechanic(mechanicId);
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write("{\"message\":\"Mechanic deleted successfully\"}");
+            response.getWriter().flush();
         } catch (SQLException e) {
             handleInternalServerError(response, e.getMessage());
+
         }
     }
 

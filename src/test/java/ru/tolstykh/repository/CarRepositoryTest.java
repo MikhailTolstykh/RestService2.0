@@ -405,7 +405,138 @@ public class CarRepositoryTest {
     }
 
 
+    @Test
+    void shouldHandleAddingCarWithExistingCustomer() throws SQLException {
+        // Добавляем клиента
+        String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Alice Doe', 'alice.doe@example.com') RETURNING id;";
+        int customerId;
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet = statement.executeQuery(insertCustomerSQL);
+            if (resultSet.next()) {
+                customerId = resultSet.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID клиента после вставки");
+            }
+        }
 
+        // Добавляем машину с существующим клиентом
+        Car car = new Car("Chevrolet Impala", customerId);
+        carRepository.addCar(car);
+
+        // Проверяем, что машина добавлена
+        Car fetchedCar = carRepository.getCarById(1);
+        assertNotNull(fetchedCar);
+        assertEquals("Chevrolet Impala", fetchedCar.getModel());
+        assertEquals(customerId, fetchedCar.getCustomerId());
+    }
+
+
+
+    @Test
+    void shouldAddAndRetrieveMechanicsByCarId() throws SQLException {
+        // Добавляем клиента
+        String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Clara Johnson', 'clara.johnson@example.com') RETURNING id;";
+        int customerId;
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet = statement.executeQuery(insertCustomerSQL);
+            if (resultSet.next()) {
+                customerId = resultSet.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID клиента после вставки");
+            }
+        }
+
+        // Добавляем машину
+        Car car = new Car("Honda Accord", customerId);
+        carRepository.addCar(car);
+
+        // Добавляем механиков
+        String insertMechanic1SQL = "INSERT INTO mechanic (name) VALUES ('Mechanic One') RETURNING id;";
+        String insertMechanic2SQL = "INSERT INTO mechanic (name) VALUES ('Mechanic Two') RETURNING id;";
+        int mechanicId1;
+        int mechanicId2;
+
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet1 = statement.executeQuery(insertMechanic1SQL);
+            if (resultSet1.next()) {
+                mechanicId1 = resultSet1.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID механика после вставки");
+            }
+
+            var resultSet2 = statement.executeQuery(insertMechanic2SQL);
+            if (resultSet2.next()) {
+                mechanicId2 = resultSet2.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID механика после вставки");
+            }
+        }
+
+        // Связываем машину и механиков
+        String insertCarMechanic1SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (?, ?);";
+        String insertCarMechanic2SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (?, ?);";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement1 = connection.prepareStatement(insertCarMechanic1SQL);
+             PreparedStatement preparedStatement2 = connection.prepareStatement(insertCarMechanic2SQL)) {
+            preparedStatement1.setInt(1, 1);
+            preparedStatement1.setInt(2, mechanicId1);
+            preparedStatement1.executeUpdate();
+            preparedStatement2.setInt(1, 1);
+            preparedStatement2.setInt(2, mechanicId2);
+            preparedStatement2.executeUpdate();
+        }
+
+        // Проверяем, что метод возвращает корректный список механиков
+        List<Mechanic> mechanics = carRepository.getMechanicsByCarId(1);
+        assertNotNull(mechanics);
+        assertEquals(2, mechanics.size(), "Expected 2 mechanics in the list.");
+        assertTrue(mechanics.stream().anyMatch(mechanic -> mechanic.getName().equals("Mechanic One")), "Expected 'Mechanic One' in the list.");
+        assertTrue(mechanics.stream().anyMatch(mechanic -> mechanic.getName().equals("Mechanic Two")), "Expected 'Mechanic Two' in the list.");
+    }
+
+    @Test
+    void shouldThrowExceptionForInvalidCustomerId() {
+        // Создаем машину с некорректным customerId (0)
+        Car car = new Car("Some Model", 0);
+
+        // Ожидаем, что метод updateCar выбросит исключение
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            carRepository.updateCar(car);
+        });
+
+        // Проверяем, что сообщение исключения содержит ожидаемое
+        assertTrue(thrown.getMessage().contains("Invalid customerId"));
+    }
+
+    @Test
+    void shouldHandleUpdateForNonExistentCar() throws SQLException {
+        // Добавляем клиента
+        String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Bob Doe', 'bob.doe@example.com') RETURNING id;";
+        int customerId;
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet = statement.executeQuery(insertCustomerSQL);
+            if (resultSet.next()) {
+                customerId = resultSet.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID клиента после вставки");
+            }
+        }
+
+        // Попробуем обновить машину, которой нет в базе данных
+        Car nonExistentCar = new Car(999, "Nonexistent Model", customerId);
+
+        // Ожидаем, что метод updateCar выполнится без ошибок, но данные не будут обновлены
+        assertDoesNotThrow(() -> carRepository.updateCar(nonExistentCar));
+
+        // Проверяем, что данные не обновились (поиск по ID 999)
+        Car fetchedCar = carRepository.getCarById(999);
+        assertNull(fetchedCar, "Car should not exist");
+    }
 
 }
 

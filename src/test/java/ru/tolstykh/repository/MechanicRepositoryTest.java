@@ -18,7 +18,7 @@ import java.sql.*;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
 
 
 @Testcontainers
@@ -51,8 +51,6 @@ public class MechanicRepositoryTest {
 
         createTables();
     }
-
-
 
 
     @BeforeEach

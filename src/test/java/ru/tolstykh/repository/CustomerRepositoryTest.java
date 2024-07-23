@@ -116,8 +116,6 @@ public class CustomerRepositoryTest {
     }
 
 
-
-
     @Test
     void shouldAddCustomer() throws SQLException {
         Customer customer = new Customer("John Doe", "john.doe@example.com");
