@@ -97,6 +97,27 @@ public class CustomerRepositoryTest {
             throw new RuntimeException("Ошибка при создании таблиц", e);
         }
     }
+
+
+
+
+    @Test
+    void shouldThrowExceptionWhenDatabaseConfigurationIsMissing() {
+        // Передаем null в конструктор
+        assertThrows(RuntimeException.class, () -> {
+            new CustomerRepository(null, null, null);
+        }, "Database configuration is missing. URL, Username, or Password is null.");
+    }
+
+    @Test
+    void shouldCreateCustomerRepositoryWithValidConfiguration() {
+        // Проверяем, что репозиторий был создан с корректной конфигурацией
+        assertNotNull(customerRepository, "CustomerRepository should be initialized.");
+    }
+
+
+
+
     @Test
     void shouldAddCustomer() throws SQLException {
         Customer customer = new Customer("John Doe", "john.doe@example.com");

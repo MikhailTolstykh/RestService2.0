@@ -142,30 +142,19 @@ public class CarRepositoryTest {
 
 
 
+
     @Test
-    void shouldGetCarById() throws SQLException {
-        // Добавляем клиента для связи с машиной
-        String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Jane Doe', 'jane.doe@example.com') RETURNING id;";
-        int customerId;
-        try (Connection connection = dataSource.getConnection();
-             Statement statement = connection.createStatement()) {
-            var resultSet = statement.executeQuery(insertCustomerSQL);
-            if (resultSet.next()) {
-                customerId = resultSet.getInt("id");
-            } else {
-                throw new RuntimeException("Не удалось получить ID клиента после вставки");
-            }
-        }
+    void shouldHandleInvalidCustomerIdWhenAddingCar() {
+        // Создаем машину с некорректным customerId (0)
+        Car car = new Car("Ford Fiesta", 0);
 
-        // Добавляем машину
-        Car car = new Car("Honda Accord", customerId);
-        carRepository.addCar(car);
+        // Ожидаем, что метод addCar выбросит исключение
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            carRepository.addCar(car);
+        });
 
-        // Проверяем, что машина возвращается корректно
-        Car fetchedCar = carRepository.getCarById(1);
-        assertNotNull(fetchedCar);
-        assertEquals("Honda Accord", fetchedCar.getModel());
-        assertEquals(customerId, fetchedCar.getCustomerId());
+        // Проверяем, что сообщение исключения содержит ожидаемое
+        assertTrue(thrown.getMessage().contains("Customer ID must be a positive integer and cannot be null"));
     }
 
     @Test

@@ -9,6 +9,7 @@ import ru.tolstykh.dto.MechanicDTO;
 import ru.tolstykh.entity.Mechanic;
 import ru.tolstykh.service.MechanicServiceInterface;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -77,8 +78,31 @@ class MechanicServletTest {
 
 
 
+    @Test
+    void shouldReturnInternalServerErrorWhenSQLExceptionIsThrownInPost() throws IOException, SQLException {
+        // Mocking the request JSON data
+        String json = "{\"name\":\"John Doe\"}";
+        BufferedReader reader = new BufferedReader(new StringReader(json));
+        when(request.getReader()).thenReturn(reader);
 
+        // Mocking the conversion from JSON to DTO and entity
+        MechanicDTO mechanicDTO = new MechanicDTO();
+        mechanicDTO.setName("John Doe");
+        Mechanic mechanic = mechanicDTO.toEntity();
 
+        // Mocking the behavior of the service to throw an SQLException
+        doThrow(new SQLException("Database error")).when(mechanicService).addMechanic(any(Mechanic.class));
+
+        try {
+            mechanicServlet.doPost(request, response);
+        } catch (ServletException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Verify the response status and error message
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(writer).write("{\"error\":\"Database error\"}");
+    }
 
     @Test
     void testDoGetWithId() throws Exception {

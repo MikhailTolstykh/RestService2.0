@@ -49,14 +49,16 @@ public class CarRepository implements CarInterface{
 
     @Override
     public void addCar(Car car) throws SQLException {
+        if (car.getCustomerId() <= 0) {
+            throw new IllegalArgumentException("Customer ID must be a positive integer and cannot be null");
+        }
+
+        String INSERT_CAR_SQL = "INSERT INTO car (model, customer_id) VALUES (?, ?)";
+
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CAR_SQL)) {
             preparedStatement.setString(1, car.getModel());
-            if (car.getCustomerId() != 0) {
-                preparedStatement.setInt(2, car.getCustomerId());
-            } else {
-                preparedStatement.setNull(2, Types.INTEGER);
-            }
+            preparedStatement.setInt(2, car.getCustomerId());
             preparedStatement.executeUpdate();
         }
     }
