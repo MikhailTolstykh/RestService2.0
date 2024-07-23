@@ -3,6 +3,7 @@ package ru.tolstykh.repository;
 import ru.tolstykh.entity.Car;
 import ru.tolstykh.entity.Customer;
 import ru.tolstykh.entity.Mechanic;
+import ru.tolstykh.util.DatabaseConfig;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -92,17 +93,16 @@ public class CarRepository implements CarInterface{
 
 
 
-
     @Override
     public void updateCar(Car car) throws SQLException {
+        if (car.getCustomerId() <= 0) {
+            throw new IllegalArgumentException("Invalid customerId: " + car.getCustomerId());
+        }
+
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CAR_SQL)) {
             preparedStatement.setString(1, car.getModel());
-            if (car.getCustomerId() != 0) {
-                preparedStatement.setInt(2, car.getCustomerId());
-            } else {
-                preparedStatement.setNull(2, Types.INTEGER);
-            }
+            preparedStatement.setInt(2, car.getCustomerId());
             preparedStatement.setInt(3, car.getId());
 
             preparedStatement.executeUpdate();

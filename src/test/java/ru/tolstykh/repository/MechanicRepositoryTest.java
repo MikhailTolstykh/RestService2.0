@@ -213,4 +213,24 @@ public class MechanicRepositoryTest {
         // Проверяем, что выбрасывается правильное исключение с правильным сообщением
         assertTrue(exception.getMessage().contains("Database configuration is missing. URL, Username, or Password is null."));
     }
+
+    @Test
+    void shouldSetGeneratedIdWhenAddingMechanic() throws SQLException {
+        Mechanic mechanic = new Mechanic(0, "John Doe");
+        mechanicRepository.addMechanic(mechanic);
+
+        assertTrue(mechanic.getId() > 0, "Mechanic ID should be greater than zero after adding to database");
+    }
+
+    @Test
+    void shouldThrowSQLExceptionWhenMechanicNameIsNull() throws SQLException {
+        Mechanic mechanic = new Mechanic(0, null); // Имя механика null
+
+        SQLException exception = assertThrows(SQLException.class, () -> {
+            mechanicRepository.addMechanic(mechanic);
+        });
+
+        assertTrue(exception.getMessage().contains("name cannot be null"), "Expected SQLException for null mechanic name");
+    }
+
 }

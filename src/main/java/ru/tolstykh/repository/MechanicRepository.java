@@ -1,8 +1,8 @@
 package ru.tolstykh.repository;
 
 import ru.tolstykh.entity.Car;
-import ru.tolstykh.entity.Customer;
 import ru.tolstykh.entity.Mechanic;
+import ru.tolstykh.util.DatabaseConfig;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -46,6 +46,10 @@ public class MechanicRepository implements MechanicInterface {
 
     @Override
     public void addMechanic(Mechanic mechanic) throws SQLException {
+        if (mechanic.getName() == null) {
+            throw new SQLException("Mechanic name cannot be null");
+        }
+
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_MECHANIC_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, mechanic.getName());
@@ -55,7 +59,6 @@ public class MechanicRepository implements MechanicInterface {
                     mechanic.setId(generatedKeys.getInt(1));
                     System.out.println("добавляю в базу ");
                 }
-
             }
         }
     }

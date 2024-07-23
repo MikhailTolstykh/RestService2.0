@@ -1,10 +1,10 @@
-package ru.tolstykh.repository;
+package ru.tolstykh.util;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class DatabaseConfig {
+public  class DatabaseConfig {
     private static final Properties properties = new Properties();
 
     static {
@@ -21,5 +21,8 @@ public class DatabaseConfig {
 
     public static String getProperty(String key) {
         return properties.getProperty(key);
+    }
+
+    public static void getProperty() {
     }
 }

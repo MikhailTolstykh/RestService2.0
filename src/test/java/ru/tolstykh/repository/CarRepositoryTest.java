@@ -141,8 +141,6 @@ public class CarRepositoryTest {
     }
 
 
-
-
     @Test
     void shouldHandleInvalidCustomerIdWhenAddingCar() {
         // Создаем машину с некорректным customerId (0)
@@ -304,6 +302,7 @@ public class CarRepositoryTest {
         assertTrue(mechanics.stream().anyMatch(mechanic -> mechanic.getName().equals("Mechanic One")), "Expected 'Mechanic One' in the list.");
         assertTrue(mechanics.stream().anyMatch(mechanic -> mechanic.getName().equals("Mechanic Two")), "Expected 'Mechanic Two' in the list.");
     }
+
     @Test
     void shouldHandleSQLExceptionInGetMechanicsByCarId() throws SQLException {
         // Мокируем CarRepository и Connection
@@ -326,7 +325,88 @@ public class CarRepositoryTest {
         assertTrue(actualMessage.contains(expectedMessage), "Expected exception message to contain: " + expectedMessage);
     }
 
-}
+    @Test
+    void shouldUpdateCarWithValidData() throws SQLException {
+        // Добавляем клиента
+        String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('John Doe', 'john.doe@example.com') RETURNING id;";
+        int customerId;
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet = statement.executeQuery(insertCustomerSQL);
+            if (resultSet.next()) {
+                customerId = resultSet.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID клиента после вставки");
+            }
+        }
 
+        // Добавляем машину
+        Car car = new Car("Toyota Corolla", customerId);
+        carRepository.addCar(car);
+
+        // Обновляем машину
+        Car updatedCar = new Car(1, "Toyota Camry", customerId);
+        carRepository.updateCar(updatedCar);
+
+        // Проверяем, что данные обновлены
+        Car fetchedCar = carRepository.getCarById(1);
+        assertNotNull(fetchedCar);
+        assertEquals("Toyota Camry", fetchedCar.getModel());
+        assertEquals(customerId, fetchedCar.getCustomerId());
+    }
+
+    @Test
+    void shouldUpdateCarWithZeroCustomerId() throws SQLException {
+        // Добавляем клиента
+        String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Jane Doe', 'jane.doe@example.com') RETURNING id;";
+        int customerId;
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet = statement.executeQuery(insertCustomerSQL);
+            if (resultSet.next()) {
+                customerId = resultSet.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID клиента после вставки");
+            }
+        }
+
+
+    }
+
+
+    @Test
+    void shouldHandleEmptyModel() throws SQLException {
+        // Добавляем клиента
+        String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('John Doe', 'john.doe@example.com') RETURNING id;";
+        int customerId;
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet = statement.executeQuery(insertCustomerSQL);
+            if (resultSet.next()) {
+                customerId = resultSet.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID клиента после вставки");
+            }
+        }
+
+        // Добавляем машину
+        Car car = new Car("Toyota Corolla", customerId);
+        carRepository.addCar(car);
+
+        // Обновляем модель автомобиля на пустую строку
+        Car updatedCar = new Car(1, "", customerId);
+        carRepository.updateCar(updatedCar);
+
+        // Проверяем, что модель обновлена на пустую строку
+        Car fetchedCar = carRepository.getCarById(1);
+        assertNotNull(fetchedCar);
+        assertEquals("", fetchedCar.getModel());
+        assertEquals(customerId, fetchedCar.getCustomerId());
+    }
+
+
+
+
+}
 
 
