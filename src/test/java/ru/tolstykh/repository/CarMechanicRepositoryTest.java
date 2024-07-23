@@ -131,18 +131,18 @@ public class CarMechanicRepositoryTest {
     }
     @Test
     void shouldDeleteAllMechanicsForCar() throws SQLException {
-        // Вставка тестовых данных
+
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
-            // Вставляем автомобиль
+
             statement.execute("INSERT INTO car (model, customer_id) VALUES ('Model Y', 1);");
-            // Вставляем механиков
+
             statement.execute("INSERT INTO mechanic (name) VALUES ('Alice'), ('Bob');");
             // Создаем связи между автомобилем и механиками
             statement.execute("INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, 1), (1, 2);");
         }
 
-        // Проверяем, что механики были добавлены
+
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) AS count FROM car_mechanic WHERE car_id = 1")) {
@@ -152,13 +152,13 @@ public class CarMechanicRepositoryTest {
             }
         }
 
-        // Удаляем все механики для автомобиля
+
         try (Connection connection = dataSource.getConnection()) {
             carMechanicRepository = new CarMechanicRepository(connection);
             carMechanicRepository.deleteCarMechanics(1);
         }
 
-        // Проверяем, что механики были удалены
+
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) AS count FROM car_mechanic WHERE car_id = 1")) {
@@ -171,22 +171,21 @@ public class CarMechanicRepositoryTest {
 
     @Test
     void shouldAddCarMechanic() throws SQLException {
-        // Вставка тестовых данных
+
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
-            // Вставляем автомобиль
+
             statement.execute("INSERT INTO car (model, customer_id) VALUES ('Model X', 1);");
-            // Вставляем механика
+
             statement.execute("INSERT INTO mechanic (name) VALUES ('Charlie');");
         }
 
-        // Добавляем связь между автомобилем и механиком
+
         try (Connection connection = dataSource.getConnection()) {
             carMechanicRepository = new CarMechanicRepository(connection);
             carMechanicRepository.addCarMechanic(1, 1);
         }
 
-        // Проверяем, что механик был добавлен
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) AS count FROM car_mechanic WHERE car_id = 1 AND mechanic_id = 1")) {
@@ -201,11 +200,11 @@ public class CarMechanicRepositoryTest {
 
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
-            // Вставляем автомобиль
+
             statement.execute("INSERT INTO car (model, customer_id) VALUES ('Model Z', 1);");
-            // Вставляем механика
+
             statement.execute("INSERT INTO mechanic (name) VALUES ('Dave');");
-            // Создаем связь между автомобилем и механиком
+
             statement.execute("INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, 1);");
         }
 
@@ -219,13 +218,13 @@ public class CarMechanicRepositoryTest {
             }
         }
 
-        // Удаляем связь между автомобилем и механиком
+
         try (Connection connection = dataSource.getConnection()) {
             carMechanicRepository = new CarMechanicRepository(connection);
             carMechanicRepository.removeCarMechanic(1, 1);
         }
 
-        // Проверяем, что механик был удален
+
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) AS count FROM car_mechanic WHERE car_id = 1 AND mechanic_id = 1")) {

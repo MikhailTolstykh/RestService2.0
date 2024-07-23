@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,15 +22,20 @@ import static org.mockito.Mockito.when;
 public class DatabaseConnectionTest {
 
 
+
     @Test
     public void testGetConnectionToDataBase() throws SQLException, ClassNotFoundException {
-        // Test the connection to the database
+
         try (Connection connection = DatabaseConnection.getConnectionToDataBase()) {
             assertNotNull(connection, "Connection should not be null");
             assertTrue(connection.isValid(2), "Connection should be valid");
         }
     }
 
+
+
 }
+
+
 
 

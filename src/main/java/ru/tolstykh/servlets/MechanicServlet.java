@@ -24,10 +24,7 @@ public class MechanicServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        // Инициализация сервиса в методе init
-        // Здесь предполагается, что вы внедряете зависимость механика, можно сделать через конструктор или инъекцию
-        // Например, через DI контейнер, но здесь используем простую инициализацию для примера.
-        // Вы можете заменить это на ваш способ инициализации
+
         mechanicService = new MechanicService(new MechanicRepository());
     }
 
@@ -51,7 +48,7 @@ public class MechanicServlet extends HttpServlet {
                         .collect(Collectors.joining(",", "[", "]"));
                 out.write(jsonArray);
             }
-            out.flush();  // Убедитесь, что это действительно вызывается
+            out.flush();
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.write("{\"error\":\"" + e.getMessage() + "\"}");
@@ -95,20 +92,33 @@ public class MechanicServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String id = request.getParameter("id");
 
-        try {
-            if (id != null) {
-                int mechanicId = Integer.parseInt(id);
-                mechanicService.deleteMechanic(mechanicId);
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().write("{\"message\":\"Mechanic deleted successfully\"}");
-            } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\":\"Mechanic ID is required\"}");
-            }
-        } catch (SQLException e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+        if (id == null) {
+            handleBadRequest(response, "{\"error\":\"Mechanic ID is required\"}");
+            return; // Ранний выход, если ID отсутствует
         }
+
+        try {
+            int mechanicId = Integer.parseInt(id);
+            mechanicService.deleteMechanic(mechanicId);
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write("{\"message\":\"Mechanic deleted successfully\"}");
+        } catch (SQLException e) {
+            handleInternalServerError(response, e.getMessage());
+        }
+    }
+
+    void handleBadRequest(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        response.setContentType("application/json"); // Устанавливаем тип контента
+        response.getWriter().write(message);
+        response.getWriter().flush();
+    }
+
+    void handleInternalServerError(HttpServletResponse response, String errorMessage) throws IOException {
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.setContentType("application/json"); // Устанавливаем тип контента
+        response.getWriter().write("{\"error\":\"" + errorMessage + "\"}");
+        response.getWriter().flush();
     }
 
     private String mechanicDTOToJson(MechanicDTO mechanicDTO) {

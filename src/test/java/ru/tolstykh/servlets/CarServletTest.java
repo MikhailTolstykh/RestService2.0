@@ -9,6 +9,7 @@ import ru.tolstykh.dto.CarDTO;
 import ru.tolstykh.entity.Car;
 import ru.tolstykh.service.CarServiceInterface;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -135,5 +136,18 @@ class CarServletTest {
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(writer).write("{\"message\":\"Car deleted successfully\"}");
         verify(carService).deleteCar(1);
+    }
+    @Test
+    void shouldReturnBadRequestWhenIdIsMissingInDelete() throws IOException {
+        when(request.getParameter("id")).thenReturn(null);
+
+        try {
+            carServlet.doDelete(request, response);
+        } catch (ServletException e) {
+            throw new RuntimeException(e);
+        }
+
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        verify(writer).write("{\"error\":\"Car ID is required\"}");
     }
 }

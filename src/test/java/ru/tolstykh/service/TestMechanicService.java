@@ -130,4 +130,25 @@ class TestMechanicService{
 
         verify(mechanicRepository, times(1)).getMechanicsByCarId(carId);
     }
+
+    @Test
+    void testGetMechanicsByCarIdThrowsSQLException() throws SQLException {
+        int carId = 1;
+
+
+        when(mechanicRepository.getMechanicsByCarId(carId)).thenThrow(new SQLException("Database error"));
+
+
+        SQLException thrown = assertThrows(SQLException.class, () -> {
+            mechanicService.getMechanicsByCarId(carId);
+        });
+
+
+        assertEquals("Database error", thrown.getMessage());
+
+
+        verify(mechanicRepository, times(1)).getMechanicsByCarId(carId);
+    }
+
+
 }

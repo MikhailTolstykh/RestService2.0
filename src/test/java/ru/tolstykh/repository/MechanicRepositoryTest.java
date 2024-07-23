@@ -18,7 +18,7 @@ import java.sql.*;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+import static org.mockito.Mockito.*;
 
 
 @Testcontainers
@@ -129,6 +129,18 @@ public class MechanicRepositoryTest {
         Mechanic fetchedMechanic = mechanicRepository.getMechanicById(mechanic.getId());
         assertNotNull(fetchedMechanic);
         assertEquals("John Doe", fetchedMechanic.getName());
+    }
+
+    @Test
+    void shouldThrowSQLExceptionWhenConnectionFails() {
+        MechanicRepository failingRepository = new MechanicRepository("invalid_url", "invalid_user", "invalid_password");
+        Mechanic mechanic = new Mechanic(0, "John Doe");
+
+        SQLException exception = assertThrows(SQLException.class, () -> {
+            failingRepository.addMechanic(mechanic);
+        });
+
+        assertTrue(exception.getMessage().contains("No suitable driver found"), "Expected SQLException with message containing 'No suitable driver found'");
     }
 
     @Test

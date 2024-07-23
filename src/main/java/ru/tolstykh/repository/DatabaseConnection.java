@@ -16,9 +16,12 @@ public final class DatabaseConnection {
 
     public static Connection getConnectionToDataBase() throws SQLException, ClassNotFoundException {
         Properties props = new Properties();
+
+
         try (InputStream input = Files.newInputStream(Paths.get("C:\\Users\\User\\IdeaProjects\\RestService2.0\\src\\main\\resources\\database.properties"))) {
             props.load(input);
         } catch (Exception e) {
+            System.out.println(e.getMessage()+e.getStackTrace());
             throw new RuntimeException("ошибка загрузки файла", e);
         }
 

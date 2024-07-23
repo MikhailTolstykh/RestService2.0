@@ -22,6 +22,8 @@ public class CarServlet extends HttpServlet {
     public CarServlet() {
         super();
     }
+
+
     @Override
     public void init() throws ServletException {
         carService = new CarService(); // Инициализируем CarService

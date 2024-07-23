@@ -96,13 +96,58 @@ public class TestCarMechanicService {
 
     @Test
     public void testClose_WhenConnectionIsAlreadyClosed() throws SQLException {
-        // Устанавливаем поведение мока для соединения
+
         when(mockConnection.isClosed()).thenReturn(true);
 
-        // Выполняем метод
+
         service.close();
 
-        // Проверяем, что метод close у соединения не был вызван, так как соединение уже закрыто
+
         verify(mockConnection, never()).close();
     }
+
+
+    @Test
+    void testCloseConnectionWhenOpen() throws SQLException {
+        Connection mockConnection = mock(Connection.class);
+        when(mockConnection.isClosed()).thenReturn(false);
+
+
+        DatabaseConnectionWrapper databaseConnectionWrapper = new DatabaseConnectionWrapper(mockConnection);
+        databaseConnectionWrapper.close();
+
+
+        verify(mockConnection, times(1)).close();
+    }
+
+    @Test
+    void testCloseConnectionWhenAlreadyClosed() throws SQLException {
+        Connection mockConnection = mock(Connection.class);
+        when(mockConnection.isClosed()).thenReturn(true);
+
+
+        DatabaseConnectionWrapper databaseConnectionWrapper = new DatabaseConnectionWrapper(mockConnection);
+        databaseConnectionWrapper.close();
+
+
+        verify(mockConnection, never()).close();
+    }
+
+    private static class DatabaseConnectionWrapper {
+        private final Connection connection;
+
+        public DatabaseConnectionWrapper(Connection connection) {
+            this.connection = connection;
+        }
+
+        public void close() throws SQLException {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        }
+    }
+
+
+
+
 }
