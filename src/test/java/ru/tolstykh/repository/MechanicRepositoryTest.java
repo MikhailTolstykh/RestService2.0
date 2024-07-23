@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 
 @Testcontainers
 public class MechanicRepositoryTest {
-    private static MechanicRepository mechanicRepository;
+    public static MechanicRepository mechanicRepository;
     private static DataSource dataSource;
 
     @Container

@@ -150,5 +150,43 @@ class TestMechanicService{
         verify(mechanicRepository, times(1)).getMechanicsByCarId(carId);
     }
 
+    @Test
+    void shouldReturnNullIfMechanicNotFound() throws SQLException {
+        int id = 2;
+        when(mechanicRepository.getMechanicById(id)).thenReturn(null);
+
+        Mechanic result = mechanicService.getMechanicById(id);
+
+        assertNull(result);
+
+        verify(mechanicRepository).getMechanicById(id);
+        verify(mechanicRepository, never()).getCarsByMechanicId(id);
+    }
+    @Test
+    void shouldHandleSQLExceptionWhenFetchingMechanic() throws SQLException {
+        int id = 3;
+        when(mechanicRepository.getMechanicById(id)).thenThrow(new SQLException("Error fetching mechanic"));
+
+        SQLException exception = assertThrows(SQLException.class, () -> mechanicService.getMechanicById(id));
+        assertEquals("Error fetching mechanic", exception.getMessage());
+
+        verify(mechanicRepository).getMechanicById(id);
+        verify(mechanicRepository, never()).getCarsByMechanicId(id);
+    }
+    @Test
+    void shouldHandleSQLExceptionWhenFetchingCars() throws SQLException {
+        int id = 4;
+        Mechanic mechanic = new Mechanic(id, "Bob Brown");
+        when(mechanicRepository.getMechanicById(id)).thenReturn(mechanic);
+        when(mechanicRepository.getCarsByMechanicId(id)).thenThrow(new SQLException("Error fetching cars"));
+
+        SQLException exception = assertThrows(SQLException.class, () -> mechanicService.getMechanicById(id));
+        assertEquals("Error fetching cars", exception.getMessage());
+
+        verify(mechanicRepository).getMechanicById(id);
+        verify(mechanicRepository).getCarsByMechanicId(id);
+    }
+
+
 
 }

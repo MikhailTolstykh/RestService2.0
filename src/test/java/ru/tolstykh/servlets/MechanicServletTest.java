@@ -19,8 +19,9 @@ import java.util.Collections;
 import java.util.List;
 
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static ru.tolstykh.repository.MechanicRepositoryTest.mechanicRepository;
 
 class MechanicServletTest {
     private StringWriter stringWriter;
@@ -240,5 +241,25 @@ class MechanicServletTest {
         verify(writer).write("{\"error\":\"Database error\"}");
         verify(writer).flush();  // Проверяем, что flush() был вызван
     }
+
+
+
+    @Test
+    void testDoDeleteWithNonExistentMechanic() throws Exception {
+        // Mocking the request parameter with an ID of a non-existent mechanic
+        when(request.getParameter("id")).thenReturn("999");
+        doThrow(new SQLException("Mechanic not found")).when(mechanicService).deleteMechanic(anyInt());
+
+        // Execute
+        mechanicServlet.doDelete(request, response);
+
+        // Verify
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(writer).write("{\"error\":\"Mechanic not found\"}");
+    }
+
+
+
+
 
 }

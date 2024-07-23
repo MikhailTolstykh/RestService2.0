@@ -59,7 +59,17 @@ public class MechanicServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String json = new BufferedReader(request.getReader()).lines().collect(Collectors.joining());
-        MechanicDTO mechanicDTO = jsonToMechanicDTO(json);
+
+        MechanicDTO mechanicDTO;
+        try {
+            mechanicDTO = jsonToMechanicDTO(json);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Invalid JSON format\"}");
+            response.getWriter().flush();
+            return;
+        }
 
         try {
             Mechanic mechanic = mechanicDTO.toEntity();
