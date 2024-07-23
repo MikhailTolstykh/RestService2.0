@@ -78,15 +78,33 @@ public class CustomerServlet extends HttpServlet {
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         CustomerDTO customerDTO = jsonToCustomerDTO(request.getReader().lines().collect(Collectors.joining()));
 
+        // Проверка валидности данных
+        if (customerDTO.getName() == null || customerDTO.getName().trim().isEmpty() ||
+                customerDTO.getId() <= 0) { // Проверяем корректность id
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Invalid data\"}");
+            response.getWriter().flush();
+            return;
+        }
+
         try {
-            Customer customer = CustomerDTO.toEntity(customerDTO); // Используем статический метод toEntity
+            Customer customer = CustomerDTO.toEntity(customerDTO);
             customerService.updateCustomer(customer);
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json");
             response.getWriter().write("{\"message\":\"Customer updated successfully\"}");
+            response.getWriter().flush();
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+            response.getWriter().flush();
         }
     }
+
+
+
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -117,9 +135,16 @@ public class CustomerServlet extends HttpServlet {
         String[] fields = json.split(",");
         for (String field : fields) {
             String[] keyValue = field.split(":");
+            if (keyValue.length != 2) {
+                continue; // Игнорируем неправильные данные
+            }
             switch (keyValue[0]) {
                 case "id":
-                    customerDTO.setId(Integer.parseInt(keyValue[1]));
+                    try {
+                        customerDTO.setId(Integer.parseInt(keyValue[1]));
+                    } catch (NumberFormatException e) {
+                        customerDTO.setId(-1); // Устанавливаем значение по умолчанию или обрабатываем ошибку по-другому
+                    }
                     break;
                 case "name":
                     customerDTO.setName(keyValue[1]);
@@ -131,4 +156,5 @@ public class CustomerServlet extends HttpServlet {
         }
         return customerDTO;
     }
+
 }

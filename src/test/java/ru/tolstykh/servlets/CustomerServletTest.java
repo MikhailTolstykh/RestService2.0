@@ -3,6 +3,9 @@ package ru.tolstykh.servlets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import ru.tolstykh.dto.CustomerDTO;
 import ru.tolstykh.entity.Customer;
 import ru.tolstykh.service.CustomerServiceInterface;
@@ -24,24 +27,37 @@ import static org.mockito.Mockito.*;
 
 class CustomerServletTest {
 
-    private CustomerServlet customerServlet;
-    private CustomerServiceInterface customerService;
-    private HttpServletRequest request;
-    private HttpServletResponse response;
-    private StringWriter stringWriter;
 
-    @BeforeEach
-    void setUp() throws ServletException {
-        customerService = mock(CustomerServiceInterface.class);
-        customerServlet = new CustomerServlet();
-        customerServlet.init();
-        customerServlet.customerService = customerService;
-        request = mock(HttpServletRequest.class);
-        response = mock(HttpServletResponse.class);
-        stringWriter = new StringWriter();
-    }
 
-    @Test
+        @InjectMocks
+        private CustomerServlet customerServlet;
+
+        @Mock
+        private CustomerServiceInterface customerService;
+
+        @Mock
+        private HttpServletRequest request;
+
+        @Mock
+        private HttpServletResponse response;
+
+        @Mock
+        private PrintWriter writer;
+
+        private StringWriter stringWriter;
+
+        @BeforeEach
+        void setUp() throws Exception {
+            MockitoAnnotations.openMocks(this);
+            stringWriter = new StringWriter();
+            // Используем StringWriter для создания PrintWriter
+            writer = new PrintWriter(stringWriter);
+            when(response.getWriter()).thenReturn(writer);
+        }
+
+
+
+        @Test
     void testDoGetWithId() throws Exception {
         when(request.getParameter("id")).thenReturn("1");
         PrintWriter writer = new PrintWriter(stringWriter);
@@ -138,4 +154,58 @@ class CustomerServletTest {
         verify(customerService, times(0)).deleteCustomer(anyInt());
         assertEquals("{\"error\":\"Customer ID is required\"}", stringWriter.toString().trim());
     }
+/*
+    @Test
+    void testDoPutSQLException() throws Exception {
+        String customerJson = "{\"id\":1,\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}";
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(customerJson)));
+
+        doThrow(new SQLException("Database error")).when(customerService).updateCustomer(any(Customer.class));
+
+        customerServlet.doPut(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(writer).write("{\"error\":\"Database error\"}");
+        verify(writer).flush();
+    }
+*/
+@Test
+void testDoPutWithInvalidJson() throws Exception {
+    // Подготовка данных
+    String invalidJson = "{\"id\":\"abc\",\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}"; // Invalid JSON
+    BufferedReader reader = new BufferedReader(new StringReader(invalidJson));
+    when(request.getReader()).thenReturn(reader);
+
+    // Вызов метода
+    customerServlet.doPut(request, response);
+
+    // Проверка
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    // Проверяем содержимое StringWriter, а не PrintWriter
+    assertEquals("{\"error\":\"Invalid data\"}", stringWriter.toString().trim());
 }
+
+    @Test
+    void testDoPutWithInvalidData() throws Exception {
+        // Подготовка данных
+        String customerJson = "{\"id\":1,\"name\":\"\",\"email\":\"john.doe@example.com\"}"; // Invalid data
+        BufferedReader reader = new BufferedReader(new StringReader(customerJson));
+        when(request.getReader()).thenReturn(reader);
+
+        // Вызов метода
+        customerServlet.doPut(request, response);
+
+        // Проверка
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        // Проверяем содержимое StringWriter, а не PrintWriter
+        assertEquals("{\"error\":\"Invalid data\"}", stringWriter.toString().trim());
+    }
+
+
+}
+
+
+
+
+
+
