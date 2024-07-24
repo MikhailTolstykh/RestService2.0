@@ -8,14 +8,17 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class CarService implements CarServiceInterface {
-    private final CarInterface carRepository;
+    private CarInterface carRepository;
 
-    public CarService() {  this.carRepository = new CarRepository();
-    }
 
     public CarService(CarInterface carRepository) {
         this.carRepository = carRepository;
     }
+
+    public CarService() {
+
+    }
+
 
     @Override
     public void addCar(Car car) throws SQLException {

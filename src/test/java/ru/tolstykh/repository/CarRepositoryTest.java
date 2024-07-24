@@ -14,10 +14,7 @@ import ru.tolstykh.entity.Car;
 import ru.tolstykh.entity.Mechanic;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -558,9 +555,95 @@ public class CarRepositoryTest {
         assertThrows(RuntimeException.class, () -> {
             new CustomerRepository("jdbcUrl", "username", null);
         }, "Database configuration is missing. URL, Username, or Password is null.");
+
+
+
     }
 
 
+
+    @Test
+    void shouldHandleClassNotFoundException() {
+        // Измените класс драйвера на несуществующий
+        DatabaseConnection dbConn = new DatabaseConnection("jdbc:postgresql://localhost:5432/mydb", "user", "password") {
+            @Override
+            protected void loadDriver() throws ClassNotFoundException {
+                // Пробрасываем исключение
+                throw new ClassNotFoundException("Driver class not found");
+            }
+        };
+
+        // Проверяем, что класс драйвера не найден
+        assertThrows(RuntimeException.class, dbConn::getConnection);
+    }
+
+    static class DatabaseConnection {
+        private final String url;
+        private final String username;
+        private final String password;
+
+        public DatabaseConnection(String url, String username, String password) {
+            this.url = url;
+            this.username = username;
+            this.password = password;
+        }
+
+        protected Connection getConnection() {
+            Connection connection = null;
+            try {
+                loadDriver();
+                connection = DriverManager.getConnection(url, username, password);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                // Handle SQLException
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            return connection;
+        }
+
+        // Метод для загрузки драйвера
+        protected void loadDriver() throws ClassNotFoundException {
+            Class.forName("org.postgresql.Driver");
+        }
+    }
+    @Test
+    void shouldReturnEmptyListWhenNoCarsInDatabase() throws SQLException {
+        // Проверяем, что в базе данных нет записей
+        List<Car> cars = carRepository.getAllCars();
+        assertNotNull(cars, "The result should not be null.");
+        assertTrue(cars.isEmpty(), "The list should be empty when no cars are present.");
+    }
+    @Test
+    void shouldReturnMultipleCarsWhenMultipleCarsExist() throws SQLException {
+        // Добавляем клиента
+        String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Bob Smith', 'bob.smith@example.com') RETURNING id;";
+        int customerId;
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            var resultSet = statement.executeQuery(insertCustomerSQL);
+            if (resultSet.next()) {
+                customerId = resultSet.getInt("id");
+            } else {
+                throw new RuntimeException("Не удалось получить ID клиента после вставки");
+            }
+        }
+
+        // Добавляем несколько машин
+        Car car1 = new Car("Ford Focus", customerId);
+        Car car2 = new Car("Honda Civic", customerId);
+        carRepository.addCar(car1);
+        carRepository.addCar(car2);
+
+        // Проверяем, что метод возвращает обе машины
+        List<Car> cars = carRepository.getAllCars();
+        assertNotNull(cars, "The result should not be null.");
+        assertEquals(2, cars.size(), "The list should contain exactly two cars.");
+        assertTrue(cars.stream().anyMatch(car -> car.getModel().equals("Ford Focus")), "The list should contain 'Ford Focus'.");
+        assertTrue(cars.stream().anyMatch(car -> car.getModel().equals("Honda Civic")), "The list should contain 'Honda Civic'.");
+    }
+
 }
+
 
 

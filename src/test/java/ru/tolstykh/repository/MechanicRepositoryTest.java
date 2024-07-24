@@ -18,7 +18,7 @@ import java.sql.*;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+import static org.mockito.Mockito.when;
 
 
 @Testcontainers
@@ -274,4 +274,77 @@ public class MechanicRepositoryTest {
             new MechanicRepository("jdbcUrl", "username", null);
         }, "Database configuration is missing. URL, Username, or Password is null.");
     }
+    @Test
+    void testAddMechanicSuccess() throws SQLException {
+        Mechanic mechanic = new Mechanic();
+        mechanic.setName("John Doe");
+
+        mechanicRepository.addMechanic(mechanic);
+
+        Mechanic retrievedMechanic = mechanicRepository.getMechanicById(mechanic.getId());
+        assertNotNull(retrievedMechanic);
+        assertEquals("John Doe", retrievedMechanic.getName());
+    }
+
+    @Test
+    void testAddMechanicThrowsSQLExceptionForNullName() {
+        Mechanic mechanic = new Mechanic();
+        mechanic.setName(null);
+
+        SQLException thrown = assertThrows(SQLException.class, () -> mechanicRepository.addMechanic(mechanic));
+        assertEquals("Mechanic name cannot be null", thrown.getMessage());
+    }
+
+    @Test
+    void testGetMechanicByIdNotFound() throws SQLException {
+        Mechanic mechanic = mechanicRepository.getMechanicById(999);
+        assertNull(mechanic);
+    }
+
+    @Test
+    void testUpdateMechanicSuccess() throws SQLException {
+        Mechanic mechanic = new Mechanic();
+        mechanic.setName("John Doe");
+        mechanicRepository.addMechanic(mechanic);
+
+        mechanic.setName("Jane Doe");
+        mechanicRepository.updateMechanic(mechanic);
+
+        Mechanic updatedMechanic = mechanicRepository.getMechanicById(mechanic.getId());
+        assertNotNull(updatedMechanic);
+        assertEquals("Jane Doe", updatedMechanic.getName());
+    }
+
+    @Test
+    void testDeleteMechanicSuccess() throws SQLException {
+        Mechanic mechanic = new Mechanic();
+        mechanic.setName("John Doe");
+        mechanicRepository.addMechanic(mechanic);
+
+        mechanicRepository.deleteMechanic(mechanic.getId());
+
+        Mechanic deletedMechanic = mechanicRepository.getMechanicById(mechanic.getId());
+        assertNull(deletedMechanic);
+    }
+
+    @Test
+    void testGetAllMechanics() throws SQLException {
+        Mechanic mechanic1 = new Mechanic();
+        mechanic1.setName("John Doe");
+        mechanicRepository.addMechanic(mechanic1);
+
+        Mechanic mechanic2 = new Mechanic();
+        mechanic2.setName("Jane Doe");
+        mechanicRepository.addMechanic(mechanic2);
+
+        List<Mechanic> mechanics = mechanicRepository.getAllMechanics();
+        assertEquals(2, mechanics.size());
+        assertTrue(mechanics.stream().anyMatch(m -> m.getName().equals("John Doe")));
+        assertTrue(mechanics.stream().anyMatch(m -> m.getName().equals("Jane Doe")));
+    }
 }
+
+
+
+
+

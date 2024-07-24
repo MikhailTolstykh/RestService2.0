@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ru.tolstykh.dto.CustomerDTO;
 import ru.tolstykh.entity.Customer;
+import ru.tolstykh.repository.CustomerRepository;
+import ru.tolstykh.service.CustomerService;
 import ru.tolstykh.service.CustomerServiceInterface;
 
 import javax.servlet.ServletException;
@@ -247,7 +249,24 @@ void testDoPutWithInvalidJson() throws Exception {
         verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         assertEquals("{\"error\":\"Database error\"}", stringWriter.toString().trim());
     }
+    @Test
+    void testInit() throws ServletException {
+        // Устанавливаем реальные параметры для CustomerRepository
+        String jdbcUrl = "jdbc:postgresql://localhost:5432/myDataBase";
+        String username = "postgres";
+        String password = "postgres";
+
+        // Выполняем инициализацию сервлета
+        customerServlet.init();
+
+        // Проверяем, что customerService был инициализирован
+        assertNotNull(customerServlet.customerService, "CustomerService should be initialized");
+
+
+    }
 }
+
+
 
 
 

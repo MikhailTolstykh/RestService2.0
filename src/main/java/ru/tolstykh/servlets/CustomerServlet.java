@@ -22,9 +22,9 @@ public class CustomerServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        CustomerRepository customerRepository = new CustomerRepository("postgres://localhost:5432/testdb",
-                "test",
-                "test");
+        CustomerRepository customerRepository = new CustomerRepository("postgres://localhost:5432/myDataBase",
+                "postgres",
+                "postgres");
         customerService = new CustomerService(customerRepository);
     }
 

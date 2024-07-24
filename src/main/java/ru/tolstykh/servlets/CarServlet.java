@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @WebServlet(name="CarServlet",urlPatterns = "/car/*")
 public class CarServlet extends HttpServlet {
-    private CarServiceInterface carService;
+    CarServiceInterface carService;
     public CarServlet() {
         super();
     }

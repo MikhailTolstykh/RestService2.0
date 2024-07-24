@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
@@ -149,5 +150,76 @@ class CarServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(writer).write("{\"error\":\"Car ID is required\"}");
+    }
+    @Test
+    void shouldHandleSQLExceptionInDoDelete() throws Exception {
+        // Arrange
+        when(request.getParameter("id")).thenReturn("1");
+        doThrow(new SQLException("Database error")).when(carService).deleteCar(anyInt());
+
+        // Act
+        carServlet.doDelete(request, response);
+
+        // Assert
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(writer).write("{\"error\":\"Database error\"}");
+    }
+    @Test
+    void shouldHandleSQLExceptionInDoPost() throws Exception {
+        // Arrange
+        String carJson = "{\"id\":1,\"model\":\"Toyota\",\"customerId\":2}";
+        CarDTO carDTO = new CarDTO();
+        carDTO.setId(1);
+        carDTO.setModel("Toyota");
+        carDTO.setCustomerId(2);
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(carJson)));
+
+        // Настроим метод carService.addCar так, чтобы он выбрасывал SQLException
+        doThrow(new SQLException("Database error")).when(carService).addCar(any(Car.class));
+
+        // Act
+        carServlet.doPost(request, response);
+
+        // Assert
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(writer).write("{\"error\":\"Database error\"}");
+    }
+
+
+
+    @Test
+    void shouldHandleSQLExceptionInDoPut() throws Exception {
+        // Arrange
+        String carJson = "{\"id\":1,\"model\":\"Toyota\",\"customerId\":2}";
+        CarDTO carDTO = new CarDTO();
+        carDTO.setId(1);
+        carDTO.setModel("Toyota");
+        carDTO.setCustomerId(2);
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(carJson)));
+
+        // Настроим метод carService.updateCar так, чтобы он выбрасывал SQLException
+        doThrow(new SQLException("Database error")).when(carService).updateCar(any(Car.class));
+
+        // Act
+        carServlet.doPut(request, response);
+
+        // Assert
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(writer).write("{\"error\":\"Database error\"}");
+    }
+    @Test
+    void testInit() throws ServletException {
+        // Устанавливаем реальные параметры для CarRepository
+        String jdbcUrl = "jdbc:postgresql://localhost:5432/myDataBase";
+        String username = "postgres";
+        String password = "postgres";
+
+        // Выполняем инициализацию сервлета
+        carServlet.init();
+
+        // Проверяем, что carService был инициализирован
+        assertNotNull(carServlet.carService, "CarService should be initialized");
+
+
     }
 }

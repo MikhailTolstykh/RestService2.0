@@ -35,17 +35,8 @@ public class CarRepository implements CarInterface{
     private static final String SELECT_MECHANICS_BY_CAR_ID = "SELECT mechanic_id FROM car_mechanic WHERE car_id = ?;";
 
 
-    protected Connection getConnection() {
-        Connection connection = null;
-        try {
-            Class.forName("org.postgresql.Driver");
-            connection = DriverManager.getConnection(URL, Username, Password);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return connection;
+    protected Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, Username, Password);
     }
 
     @Override

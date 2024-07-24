@@ -2,9 +2,7 @@ package ru.tolstykh.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import ru.tolstykh.repository.CarMechanicRepository;
-import ru.tolstykh.service.CarMechanicService;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,7 +10,7 @@ import java.sql.SQLException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class TestCarMechanicService {
+ class CarMechanicServiceTest {
 
     private CarMechanicRepository mockRepository;
     private Connection mockConnection;
@@ -29,121 +27,131 @@ public class TestCarMechanicService {
 
     @Test
     public void testConstructor_ThrowsException_WhenConnectionIsNull() {
-        try {
-            new CarMechanicService(null, mockRepository);
-            fail("Expected IllegalArgumentException to be thrown");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Connection and repository cannot be null", e.getMessage());
-        }
+        // Arrange & Act & Assert
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new CarMechanicService(null, mockRepository));
+        assertEquals("Connection and repository cannot be null", thrown.getMessage());
     }
 
     @Test
     public void testConstructor_ThrowsException_WhenRepositoryIsNull() {
-        try {
-            new CarMechanicService(mockConnection, null);
-            fail("Expected IllegalArgumentException to be thrown");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Connection and repository cannot be null", e.getMessage());
-        }
+        // Arrange & Act & Assert
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new CarMechanicService(mockConnection, null));
+        assertEquals("Connection and repository cannot be null", thrown.getMessage());
     }
 
     @Test
     public void testAddCarMechanic() throws SQLException {
+        // Arrange
         int carId = 1;
         int mechanicId = 2;
 
-        // Выполняем метод
+        // Act
         service.addCarMechanic(carId, mechanicId);
 
-        // Проверяем, что метод репозитория был вызван с правильными аргументами
+        // Assert
         verify(mockRepository).addCarMechanic(carId, mechanicId);
     }
 
     @Test
     public void testRemoveCarMechanic() throws SQLException {
+        // Arrange
         int carId = 1;
         int mechanicId = 2;
 
-        // Выполняем метод
+        // Act
         service.removeCarMechanic(carId, mechanicId);
 
-        // Проверяем, что метод репозитория был вызван с правильными аргументами
+        // Assert
         verify(mockRepository).removeCarMechanic(carId, mechanicId);
     }
 
     @Test
     public void testDeleteCarMechanics() throws SQLException {
+        // Arrange
         int carId = 1;
 
-        // Выполняем метод
+        // Act
         service.deleteCarMechanics(carId);
 
-        // Проверяем, что метод репозитория был вызван с правильными аргументами
+        // Assert
         verify(mockRepository).deleteCarMechanics(carId);
     }
 
     @Test
-    public void testClose() throws SQLException {
-        // Устанавливаем поведение мока для соединения
+    void shouldCloseConnectionWhenNotNullAndNotClosed() throws SQLException {
+        // Arrange
         when(mockConnection.isClosed()).thenReturn(false);
 
-        // Выполняем метод
+        // Act
         service.close();
 
-        // Проверяем, что соединение было закрыто
+        // Assert
         verify(mockConnection).close();
     }
 
     @Test
-    public void testClose_WhenConnectionIsAlreadyClosed() throws SQLException {
-
+    void shouldNotCloseConnectionWhenAlreadyClosed() throws SQLException {
+        // Arrange
         when(mockConnection.isClosed()).thenReturn(true);
 
-
+        // Act
         service.close();
 
-
+        // Assert
         verify(mockConnection, never()).close();
     }
 
-
     @Test
-    void testCloseConnectionWhenOpen() throws SQLException {
-        Connection mockConnection = mock(Connection.class);
+    void shouldHandleSQLExceptionWhenClosingConnection() throws SQLException {
+        // Arrange
         when(mockConnection.isClosed()).thenReturn(false);
+        doThrow(new SQLException("Connection close error")).when(mockConnection).close();
 
-
-        DatabaseConnectionWrapper databaseConnectionWrapper = new DatabaseConnectionWrapper(mockConnection);
-        databaseConnectionWrapper.close();
-
-
-        verify(mockConnection, times(1)).close();
+        // Act & Assert
+        SQLException thrown = assertThrows(SQLException.class, () -> service.close());
+        assertEquals("Connection close error", thrown.getMessage());
     }
 
     @Test
-    void testCloseConnectionWhenAlreadyClosed() throws SQLException {
-        Connection mockConnection = mock(Connection.class);
+    void shouldHandleSQLExceptionWhenConnectionIsAlreadyClosed() throws SQLException {
+        // Arrange
         when(mockConnection.isClosed()).thenReturn(true);
 
+        // Act
+        service.close();
 
-        DatabaseConnectionWrapper databaseConnectionWrapper = new DatabaseConnectionWrapper(mockConnection);
-        databaseConnectionWrapper.close();
-
-
+        // Assert
         verify(mockConnection, never()).close();
     }
 
-    private static class DatabaseConnectionWrapper {
-        private final Connection connection;
+    @Test
+    void shouldHandleSQLExceptionWhenClosingConnectionAndNotNull() throws SQLException {
+        // Arrange
+        when(mockConnection.isClosed()).thenReturn(false);
+        doThrow(new SQLException("Connection close error")).when(mockConnection).close();
 
-        public DatabaseConnectionWrapper(Connection connection) {
-            this.connection = connection;
-        }
-
-        public void close() throws SQLException {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        }
+        // Act & Assert
+        SQLException thrown = assertThrows(SQLException.class, () -> service.close());
+        assertEquals("Connection close error", thrown.getMessage());
     }
-}
+
+
+
+
+
+
+
+
+     @Test
+     void shouldNotThrowExceptionIfConnectionIsAlreadyClosedAndCloseFails() throws SQLException {
+         // Arrange: setup mock behavior
+         when(mockConnection.isClosed()).thenReturn(true);
+
+         // Act & Assert: call the close method and ensure no exception is thrown
+         service.close();
+
+         // Verify that connection.close() was not called
+         verify(mockConnection, never()).close();
+     }
+ }
+

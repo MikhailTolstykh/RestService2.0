@@ -354,7 +354,21 @@ class MechanicServletTest {
         assertTrue(exception.getCause() instanceof JsonMappingException);
         assertEquals("Invalid JSON format", exception.getMessage());
     }
+    @Test
+    void testInit() throws ServletException {
+        // Устанавливаем реальные параметры для MechanicRepository
+        String jdbcUrl = "jdbc:postgresql://localhost:5432/myDataBase";
+        String username = "postgres";
+        String password = "postgres";
 
+
+        mechanicServlet.init();
+
+
+        assertNotNull(mechanicServlet.mechanicService, "MechanicService should be initialized");
+
+
+    }
 }
 
 
