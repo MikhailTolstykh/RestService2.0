@@ -1,74 +1,82 @@
 package ru.tolstykh.service;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-
 import ru.tolstykh.entity.Car;
 import ru.tolstykh.repository.CarInterface;
+import ru.tolstykh.service.CarService;
 
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
-class TestCarService {
+ class CarServiceTest {
 
-    @Mock
-    private CarInterface carRepository;
-
-    @InjectMocks
     private CarService carService;
+    private CarInterface carRepositoryMock;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+    void setUp() {
+        carRepositoryMock = mock(CarInterface.class);
+        carService = new CarService(carRepositoryMock);
     }
 
     @Test
-     void testAddCar() throws SQLException {
-        Car car = new Car();
+    void shouldAddCar() throws SQLException {
+        Car car = new Car(1, "Model X", 1);
+
+        // Выполнение действия в сервисе
         carService.addCar(car);
-        verify(carRepository, times(1)).addCar(car);
+
+        // Проверяем, что метод addCar был вызван на мок-объекте carRepositoryMock
+        verify(carRepositoryMock, times(1)).addCar(car);
     }
 
     @Test
-     void testGetCarById() throws SQLException {
-        Car car = new Car();
-        when(carRepository.getCarById(1)).thenReturn(car);
+    void shouldGetCarById() throws SQLException {
+        Car car = new Car(1, "Model X", 1);
+        when(carRepositoryMock.getCarById(1)).thenReturn(car);
 
-        Car result = carService.getCarById(1);
-        assertEquals(car, result);
+        Car fetchedCar = carService.getCarById(1);
+
+        verify(carRepositoryMock, times(1)).getCarById(1);
+        assertNotNull(fetchedCar);
+        assertEquals("Model X", fetchedCar.getModel());
     }
 
     @Test
-     void testUpdateCar() throws SQLException {
-        Car car = new Car();
+    void shouldUpdateCar() throws SQLException {
+        Car car = new Car(1, "Model X", 1);
+
+        // Выполнение действия в сервисе
         carService.updateCar(car);
-        verify(carRepository, times(1)).updateCar(car);
+
+        // Проверяем, что метод updateCar был вызван на мок-объекте carRepositoryMock
+        verify(carRepositoryMock, times(1)).updateCar(car);
     }
 
     @Test
-    void testDeleteCar() throws SQLException {
+    void shouldDeleteCar() throws SQLException {
+        // Выполнение действия в сервисе
         carService.deleteCar(1);
-        verify(carRepository, times(1)).deleteCar(1);
+
+        // Проверяем, что метод deleteCar был вызван на мок-объекте carRepositoryMock
+        verify(carRepositoryMock, times(1)).deleteCar(1);
     }
 
     @Test
-     void testGetAllCars() throws SQLException {
-        Car car1 = new Car();
-        Car car2 = new Car();
-        List<Car> cars = Arrays.asList(car1, car2);
-        when(carRepository.getAllCars()).thenReturn(cars);
+    void shouldGetAllCars() throws SQLException {
+        Car car = new Car(1, "Model X", 1);
+        when(carRepositoryMock.getAllCars()).thenReturn(Collections.singletonList(car));
 
-        List<Car> result = carService.getAllCars();
-        assertEquals(2, result.size());
-        assertEquals(car1, result.get(0));
-        assertEquals(car2, result.get(1));
+        List<Car> cars = carService.getAllCars();
+
+        verify(carRepositoryMock, times(1)).getAllCars();
+        assertFalse(cars.isEmpty());
+        assertEquals("Model X", cars.get(0).getModel());
     }
+
+
 }

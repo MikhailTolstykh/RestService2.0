@@ -230,5 +230,48 @@ public class MechanicRepositoryTest {
 
         assertTrue(exception.getMessage().contains("name cannot be null"), "Expected SQLException for null mechanic name");
     }
+    @Test
+    void shouldUpdateMechanicNameSuccessfully() throws SQLException {
+        Mechanic mechanic = new Mechanic(0, "John Doe");
+        mechanicRepository.addMechanic(mechanic);
 
+        mechanic.setName("Jane Doe");
+        mechanicRepository.updateMechanic(mechanic);
+
+        Mechanic updatedMechanic = mechanicRepository.getMechanicById(mechanic.getId());
+        assertNotNull(updatedMechanic);
+        assertEquals("Jane Doe", updatedMechanic.getName());
+    }
+    @Test
+    void shouldDeleteMechanicSuccessfully() throws SQLException {
+        Mechanic mechanic = new Mechanic(0, "John Doe");
+        mechanicRepository.addMechanic(mechanic);
+
+        mechanicRepository.deleteMechanic(mechanic.getId());
+
+        Mechanic deletedMechanic = mechanicRepository.getMechanicById(mechanic.getId());
+        assertNull(deletedMechanic);
+    }
+    @Test
+    void shouldThrowRuntimeExceptionWhenDatabaseConfigIsMissing() {
+        // Проверяем случай, когда все параметры равны null
+        assertThrows(RuntimeException.class, () -> {
+            new MechanicRepository(null, null, null);
+        }, "Database configuration is missing. URL, Username, or Password is null.");
+
+        // Проверяем случай, когда URL равен null
+        assertThrows(RuntimeException.class, () -> {
+            new MechanicRepository(null, "username", "password");
+        }, "Database configuration is missing. URL, Username, or Password is null.");
+
+        // Проверяем случай, когда Username равен null
+        assertThrows(RuntimeException.class, () -> {
+            new MechanicRepository("jdbcUrl", null, "password");
+        }, "Database configuration is missing. URL, Username, or Password is null.");
+
+        // Проверяем случай, когда Password равен null
+        assertThrows(RuntimeException.class, () -> {
+            new MechanicRepository("jdbcUrl", "username", null);
+        }, "Database configuration is missing. URL, Username, or Password is null.");
+    }
 }

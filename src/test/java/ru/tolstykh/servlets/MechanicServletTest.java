@@ -5,8 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonMappingException;
 import ru.tolstykh.dto.MechanicDTO;
 import ru.tolstykh.entity.Mechanic;
+import ru.tolstykh.repository.MechanicRepository;
+import ru.tolstykh.service.MechanicService;
 import ru.tolstykh.service.MechanicServiceInterface;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +18,8 @@ import java.io.*;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
@@ -286,9 +291,72 @@ class MechanicServletTest {
         verify(writer).write("{\"message\":\"Mechanic deleted successfully\"}");
         verify(writer).flush();
     }
+    @Test
+    void testDoPostWithInvalidJson() throws Exception {
+        // Подготовка некорректного JSON (не закрытый JSON)
+        String invalidJson = "{\"name\":\"John Doe\""; // Некорректный JSON
+        BufferedReader reader = new BufferedReader(new StringReader(invalidJson));
+        when(request.getReader()).thenReturn(reader);
 
+        // Вызов метода
+        mechanicServlet.doPost(request, response);
+
+        // Проверка поведения
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST); // Ожидаемый статус 400
+        verify(response).setContentType("application/json");
+        verify(writer).write("{\"error\":\"Invalid JSON format\"}");
+        verify(writer).flush();
+    }
+    @Test
+    void testDoPutHandlesSQLException() throws Exception {
+        // Given
+        String mechanicJson = "{\"id\":1,\"name\":\"John Doe\"}";
+        BufferedReader reader = new BufferedReader(new StringReader(mechanicJson));
+        when(request.getReader()).thenReturn(reader);
+
+        // Mock the conversion method
+        doThrow(new SQLException("Database error")).when(mechanicService).updateMechanic(any(Mechanic.class));
+
+        // When
+        mechanicServlet.doPut(request, response);
+
+        // Then
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(response).setContentType("application/json"); // Проверка установки типа контента
+        verify(response.getWriter()).write("{\"error\":\"Database error\"}");
+        verify(response.getWriter()).flush();
+    }
+    @Test
+    void testJsonToMechanicDTOSuccess() throws IOException {
+
+        String validJson = "{\"id\":1,\"name\":\"John Doe\"}";
+
+
+        MechanicDTO mechanicDTO = mechanicServlet.jsonToMechanicDTO(validJson);
+
+
+        assertNotNull(mechanicDTO);
+        assertEquals(1, mechanicDTO.getId());
+        assertEquals("John Doe", mechanicDTO.getName());
+    }
+
+    @Test
+    void testJsonToMechanicDTOInvalidJson() {
+
+        String invalidJson = "{\"id\":\"not-an-int\",\"name\":\"John Doe\"}"; // id не является числом
+
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            mechanicServlet.jsonToMechanicDTO(invalidJson);
+        });
+
+
+        assertTrue(exception.getCause() instanceof JsonMappingException);
+        assertEquals("Invalid JSON format", exception.getMessage());
+    }
 
 }
+
 
 
 

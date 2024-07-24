@@ -1,5 +1,6 @@
 package ru.tolstykh.servlets;
 
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,33 +29,34 @@ import static org.mockito.Mockito.*;
 class CustomerServletTest {
 
 
+    @InjectMocks
+    private CustomerServlet customerServlet;
 
-        @InjectMocks
-        private CustomerServlet customerServlet;
+    @Mock
+    private CustomerServiceInterface customerService;
 
-        @Mock
-        private CustomerServiceInterface customerService;
+    @Mock
+    private HttpServletRequest request;
 
-        @Mock
-        private HttpServletRequest request;
+    @Mock
+    private HttpServletResponse response;
 
-        @Mock
-        private HttpServletResponse response;
+    @Mock
+    private PrintWriter writer;
+    @Mock
+    private StringWriter stringWriter;
 
-        @Mock
-        private PrintWriter writer;
 
-        private StringWriter stringWriter;
 
-        @BeforeEach
-        void setUp() throws Exception {
-            MockitoAnnotations.openMocks(this);
-            stringWriter = new StringWriter();
-            // Используем StringWriter для создания PrintWriter
-            writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-        }
 
+    @BeforeEach
+    void setUp() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        stringWriter = new StringWriter();
+        // Используем StringWriter для создания PrintWriter
+        writer = new PrintWriter(stringWriter);
+        when(response.getWriter()).thenReturn(writer);
+    }
 
 
         @Test
@@ -200,9 +202,53 @@ void testDoPutWithInvalidJson() throws Exception {
         // Проверяем содержимое StringWriter, а не PrintWriter
         assertEquals("{\"error\":\"Invalid data\"}", stringWriter.toString().trim());
     }
+    @Test
+    public void testDoPut_CatchBlock() throws Exception {
+        // Подготовка тестовых данных
+        String customerJson = "{\"id\":1,\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}";
+        BufferedReader reader = new BufferedReader(new StringReader(customerJson));
+        when(request.getReader()).thenReturn(reader);
+        doThrow(new SQLException("Database error")).when(customerService).updateCustomer(any());
+
+        // Выполнение метода doPut
+        customerServlet.doPut(request, response);
+
+        // Проверка ожидаемого поведения
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(response).setContentType("application/json");
+        assertEquals("{\"error\":\"Database error\"}", stringWriter.toString().trim());
+    }
+    @Test
+    public void testDoPost_CatchBlock() throws Exception {
+        // Подготовка тестовых данных
+        String customerJson = "{\"id\":1,\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}";
+        BufferedReader reader = new BufferedReader(new StringReader(customerJson));
+        when(request.getReader()).thenReturn(reader);
+        doThrow(new SQLException("Database error")).when(customerService).addCustomer(any());
 
 
+        customerServlet.doPost(request, response);
+
+        // Проверка ожидаемого поведения
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        assertEquals("{\"error\":\"Database error\"}", stringWriter.toString().trim());
+    }
+    @Test
+    public void testDoDelete_CatchBlock() throws Exception {
+
+        String customerId = "1";
+        when(request.getParameter("id")).thenReturn(customerId);
+        doThrow(new SQLException("Database error")).when(customerService).deleteCustomer(anyInt());
+
+
+        customerServlet.doDelete(request, response);
+
+
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        assertEquals("{\"error\":\"Database error\"}", stringWriter.toString().trim());
+    }
 }
+
 
 
 

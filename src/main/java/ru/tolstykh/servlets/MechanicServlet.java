@@ -1,5 +1,7 @@
 package ru.tolstykh.servlets;
 
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonMappingException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import ru.tolstykh.dto.MechanicDTO;
 import ru.tolstykh.entity.Mechanic;
 import ru.tolstykh.repository.MechanicRepository;
@@ -59,12 +61,14 @@ public class MechanicServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String json = new BufferedReader(request.getReader()).lines().collect(Collectors.joining());
+        System.out.println("Received JSON: " + json);
 
         MechanicDTO mechanicDTO;
         try {
             mechanicDTO = jsonToMechanicDTO(json);
         } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            System.out.println("Exception during JSON parsing: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400
             response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"Invalid JSON format\"}");
             response.getWriter().flush();
@@ -74,10 +78,10 @@ public class MechanicServlet extends HttpServlet {
         try {
             Mechanic mechanic = mechanicDTO.toEntity();
             mechanicService.addMechanic(mechanic);
-            response.setStatus(HttpServletResponse.SC_CREATED);
+            response.setStatus(HttpServletResponse.SC_CREATED); // 201
             response.getWriter().write("{\"message\":\"Mechanic added successfully\"}");
         } catch (SQLException e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // 500
             response.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
@@ -91,12 +95,16 @@ public class MechanicServlet extends HttpServlet {
             Mechanic mechanic = mechanicDTO.toEntity();
             mechanicService.updateMechanic(mechanic);
             response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json"); // Устанавливаем тип контента
             response.getWriter().write("{\"message\":\"Mechanic updated successfully\"}");
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setContentType("application/json"); // Устанавливаем тип контента
             response.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+            response.getWriter().flush();
         }
     }
+
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -137,21 +145,12 @@ public class MechanicServlet extends HttpServlet {
         return String.format("{\"id\":%d,\"name\":\"%s\"}", mechanicDTO.getId(), mechanicDTO.getName());
     }
 
-    private MechanicDTO jsonToMechanicDTO(String json) {
-        MechanicDTO mechanicDTO = new MechanicDTO();
-        json = json.replace("{", "").replace("}", "").replace("\"", "");
-        String[] fields = json.split(",");
-        for (String field : fields) {
-            String[] keyValue = field.split(":");
-            switch (keyValue[0]) {
-                case "id":
-                    mechanicDTO.setId(Integer.parseInt(keyValue[1]));
-                    break;
-                case "name":
-                    mechanicDTO.setName(keyValue[1]);
-                    break;
-            }
+    MechanicDTO jsonToMechanicDTO(String json) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(json, MechanicDTO.class);
+        } catch (JsonMappingException e) {
+            throw new IllegalArgumentException("Invalid JSON format", e);
         }
-        return mechanicDTO;
     }
 }

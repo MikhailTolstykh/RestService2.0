@@ -537,6 +537,29 @@ public class CarRepositoryTest {
         Car fetchedCar = carRepository.getCarById(999);
         assertNull(fetchedCar, "Car should not exist");
     }
+    @Test
+    void shouldThrowRuntimeExceptionWhenDatabaseConfigIsMissing() {
+        // Проверка, когда все параметры равны null
+        assertThrows(RuntimeException.class, () -> {
+            new CustomerRepository(null, null, null);
+        }, "Database configuration is missing. URL, Username, or Password is null.");
+
+        // Проверка, когда URL равен null
+        assertThrows(RuntimeException.class, () -> {
+            new CustomerRepository(null, "username", "password");
+        }, "Database configuration is missing. URL, Username, or Password is null.");
+
+        // Проверка, когда Username равен null
+        assertThrows(RuntimeException.class, () -> {
+            new CustomerRepository("jdbcUrl", null, "password");
+        }, "Database configuration is missing. URL, Username, or Password is null.");
+
+        // Проверка, когда Password равен null
+        assertThrows(RuntimeException.class, () -> {
+            new CustomerRepository("jdbcUrl", "username", null);
+        }, "Database configuration is missing. URL, Username, or Password is null.");
+    }
+
 
 }
 
