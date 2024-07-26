@@ -14,6 +14,7 @@ import ru.tolstykh.entity.Car;
 import ru.tolstykh.entity.Mechanic;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.List;
 
@@ -47,6 +48,7 @@ public class CarRepositoryTest {
         System.out.println("Репозиторий подключился");
 
         createTables();
+
     }
 
     @BeforeEach
@@ -645,11 +647,15 @@ public class CarRepositoryTest {
             carRepository.getAllCars();
         });
     }
-
     @Test
-    public void testCarRepositoryConstructor() {
-        assertNotNull(carRepository);
+    void shouldInitializeCarRepositoryWithConnection() {
+        try (Connection connection = dataSource.getConnection()) {
+            CarRepository carRepository = new CarRepository(connection);
+            assertNotNull(carRepository, "CarRepository should be initialized");
+        } catch (SQLException e) {
+            fail("Failed to obtain connection or initialize CarRepository", e);
+        }
     }
-
-
 }
+
+
