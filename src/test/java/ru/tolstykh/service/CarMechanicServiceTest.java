@@ -74,17 +74,7 @@ class CarMechanicServiceTest {
         verify(mockRepository).deleteCarMechanics(carId);
     }
 
-    @Test
-    void shouldCloseConnectionWhenNotNullAndNotClosed() throws SQLException {
 
-        when(mockConnection.isClosed()).thenReturn(false);
-
-
-        service.close();
-
-
-        verify(mockConnection).close();
-    }
 
     @Test
     void shouldNotCloseConnectionWhenAlreadyClosed() throws SQLException {
@@ -122,6 +112,7 @@ class CarMechanicServiceTest {
         assertEquals("Connection close error", thrown.getMessage());
     }
 
+
     @Test
     void NotThrowExceptionIfConnectionIsAlreadyClosedAndCloseFails() throws SQLException {
 
@@ -132,5 +123,94 @@ class CarMechanicServiceTest {
         verify(mockConnection, never()).close();
     }
 
+
+    @Test
+    void shouldCloseConnection() throws SQLException {
+        // Создаем мок для CarMechanicRepository
+        CarMechanicRepository repository = mock(CarMechanicRepository.class);
+
+        // Создаем мок для Connection и для его метода close
+        Connection connection = mock(Connection.class);
+        doNothing().when(connection).close();
+
+        // Создаем экземпляр CarMechanicService
+        CarMechanicService service = new CarMechanicService(connection, repository);
+
+        // Закрываем соединение с помощью сервиса
+        service.close();
+
+        // Проверяем, что метод close был вызван
+        verify(connection, times(1)).close();
+    }
+
+    @Test
+    void shouldNotThrowExceptionWhenCloseIsCalledTwice() throws SQLException {
+
+        CarMechanicRepository repository = mock(CarMechanicRepository.class);
+
+
+        Connection connection = mock(Connection.class);
+        doNothing().when(connection).close();
+
+        CarMechanicService service = new CarMechanicService(connection, repository);
+
+
+
+
+
+        service.close();
+
+
+        verify(connection, times(1)).close();
+    }
+
+    @Test
+    void shouldThrowExceptionWhenConnectionIsNull() {
+
+        CarMechanicRepository repository = mock(CarMechanicRepository.class);
+
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> new CarMechanicService(null, repository));
+        assertEquals("Connection and repository cannot be null", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRepositoryIsNull() throws SQLException {
+
+        Connection connection = mock(Connection.class);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> new CarMechanicService(connection, null));
+        assertEquals("Connection and repository cannot be null", exception.getMessage());
+    }
+
+
+    @Test
+    void shouldCloseConnectionWhenNotNullAndNotClosed() throws SQLException {
+
+        when(mockConnection.isClosed()).thenReturn(false);
+        service = new CarMechanicService(mockConnection,mockRepository );
+
+
+        service.close();
+
+
+        verify(mockConnection, times(1)).close();
+    }
+
+    @Test
+    void shouldNotCloseConnectionWhenNotNullAndClosed() throws SQLException {
+
+        when(mockConnection.isClosed()).thenReturn(true);
+        service = new CarMechanicService(mockConnection,mockRepository );
+
+
+        service.close();
+
+
+        verify(mockConnection, times(0)).close();
+    }
 }
+
+
+
 

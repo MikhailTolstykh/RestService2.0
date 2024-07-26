@@ -35,7 +35,7 @@ public class CarMechanicService implements CarMechanicServiceInterface {
 
     @Override
     public void close() throws SQLException {
-        if (connection != null && !connection.isClosed()) {
+        if ( !connection.isClosed()) {
             connection.close();
         }
     }
