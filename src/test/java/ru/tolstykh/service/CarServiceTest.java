@@ -27,10 +27,10 @@ class CarServiceTest {
     void shouldAddCar() throws SQLException {
         Car car = new Car(1, "Model X", 1);
 
-        // Выполнение действия в сервисе
+
         carService.addCar(car);
 
-        // Проверяем, что метод addCar был вызван на мок-объекте carRepositoryMock
+
         verify(carRepositoryMock, times(1)).addCar(car);
     }
 
@@ -50,19 +50,19 @@ class CarServiceTest {
     void shouldUpdateCar() throws SQLException {
         Car car = new Car(1, "Model X", 1);
 
-        // Выполнение действия в сервисе
+
         carService.updateCar(car);
 
-        // Проверяем, что метод updateCar был вызван на мок-объекте carRepositoryMock
+
         verify(carRepositoryMock, times(1)).updateCar(car);
     }
 
     @Test
     void shouldDeleteCar() throws SQLException {
-        // Выполнение действия в сервисе
+
         carService.deleteCar(1);
 
-        // Проверяем, что метод deleteCar был вызван на мок-объекте carRepositoryMock
+
         verify(carRepositoryMock, times(1)).deleteCar(1);
     }
 

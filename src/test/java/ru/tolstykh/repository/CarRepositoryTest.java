@@ -197,14 +197,13 @@ public class CarRepositoryTest {
             }
         }
 
-        // Добавляем машину
+
         Car car = new Car("Ford Mustang", customerId);
         carRepository.addCar(car);
 
-        // Удаляем машину
+
         carRepository.deleteCar(1);
 
-        // Проверяем, что машина удалена
         Car fetchedCar = carRepository.getCarById(1);
         assertNull(fetchedCar);
     }
@@ -224,13 +223,13 @@ public class CarRepositoryTest {
             }
         }
 
-        // Добавляем машины
+
         Car car1 = new Car("Chevrolet Malibu", customerId);
         Car car2 = new Car("Subaru Legacy", customerId);
         carRepository.addCar(car1);
         carRepository.addCar(car2);
 
-        // Проверяем, что все машины возвращаются корректно
+
         List<Car> cars = carRepository.getAllCars();
         assertNotNull(cars);
         assertEquals(2, cars.size(), "Expected 2 cars in the list.");
@@ -252,11 +251,11 @@ public class CarRepositoryTest {
             }
         }
 
-        // Добавляем машину
+
         Car car = new Car("Toyota Camry", customerId);
         carRepository.addCar(car);
 
-        // Добавляем механиков
+
         String insertMechanic1SQL = "INSERT INTO mechanic (name) VALUES ('Mechanic One') RETURNING id;";
         String insertMechanic2SQL = "INSERT INTO mechanic (name) VALUES ('Mechanic Two') RETURNING id;";
         int mechanicId1;
@@ -430,7 +429,7 @@ public class CarRepositoryTest {
 
     @Test
     void shouldAddAndRetrieveMechanicsByCarId() throws SQLException {
-        // Добавляем клиента
+
         String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Clara Johnson', 'clara.johnson@example.com') RETURNING id;";
         int customerId;
         try (Connection connection = dataSource.getConnection();
@@ -443,11 +442,11 @@ public class CarRepositoryTest {
             }
         }
 
-        // Добавляем машину
+
         Car car = new Car("Honda Accord", customerId);
         carRepository.addCar(car);
 
-        // Добавляем механиков
+
         String insertMechanic1SQL = "INSERT INTO mechanic (name) VALUES ('Mechanic One') RETURNING id;";
         String insertMechanic2SQL = "INSERT INTO mechanic (name) VALUES ('Mechanic Two') RETURNING id;";
         int mechanicId1;
@@ -470,7 +469,7 @@ public class CarRepositoryTest {
             }
         }
 
-        // Связываем машину и механиков
+
         String insertCarMechanic1SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (?, ?);";
         String insertCarMechanic2SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (?, ?);";
 

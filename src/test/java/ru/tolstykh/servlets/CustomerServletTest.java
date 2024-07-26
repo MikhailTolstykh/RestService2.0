@@ -158,71 +158,59 @@ class CustomerServletTest {
         verify(customerService, times(0)).deleteCustomer(anyInt());
         assertEquals("{\"error\":\"Customer ID is required\"}", stringWriter.toString().trim());
     }
-/*
-    @Test
-    void testDoPutSQLException() throws Exception {
-        String customerJson = "{\"id\":1,\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}";
-        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(customerJson)));
 
-        doThrow(new SQLException("Database error")).when(customerService).updateCustomer(any(Customer.class));
+    @Test
+    void testDoPutWithInvalidJson() throws Exception {
+
+        String invalidJson = "{\"id\":\"abc\",\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}"; // Invalid JSON
+        BufferedReader reader = new BufferedReader(new StringReader(invalidJson));
+        when(request.getReader()).thenReturn(reader);
+
 
         customerServlet.doPut(request, response);
 
-        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        verify(writer).write("{\"error\":\"Database error\"}");
-        verify(writer).flush();
+
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+        assertEquals("{\"error\":\"Invalid data\"}", stringWriter.toString().trim());
     }
-*/
-@Test
-void testDoPutWithInvalidJson() throws Exception {
-    // Подготовка данных
-    String invalidJson = "{\"id\":\"abc\",\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}"; // Invalid JSON
-    BufferedReader reader = new BufferedReader(new StringReader(invalidJson));
-    when(request.getReader()).thenReturn(reader);
-
-    // Вызов метода
-    customerServlet.doPut(request, response);
-
-    // Проверка
-    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    // Проверяем содержимое StringWriter, а не PrintWriter
-    assertEquals("{\"error\":\"Invalid data\"}", stringWriter.toString().trim());
-}
 
     @Test
     void testDoPutWithInvalidData() throws Exception {
-        // Подготовка данных
+
         String customerJson = "{\"id\":1,\"name\":\"\",\"email\":\"john.doe@example.com\"}"; // Invalid data
         BufferedReader reader = new BufferedReader(new StringReader(customerJson));
         when(request.getReader()).thenReturn(reader);
 
-        // Вызов метода
+
         customerServlet.doPut(request, response);
 
-        // Проверка
+
         verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        // Проверяем содержимое StringWriter, а не PrintWriter
+
         assertEquals("{\"error\":\"Invalid data\"}", stringWriter.toString().trim());
     }
+
+
+
     @Test
-    public void testDoPut_CatchBlock() throws Exception {
-        // Подготовка тестовых данных
+     void testDoPut_CatchBlock() throws Exception {
+
         String customerJson = "{\"id\":1,\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}";
         BufferedReader reader = new BufferedReader(new StringReader(customerJson));
         when(request.getReader()).thenReturn(reader);
         doThrow(new SQLException("Database error")).when(customerService).updateCustomer(any());
 
-        // Выполнение метода doPut
         customerServlet.doPut(request, response);
 
-        // Проверка ожидаемого поведения
+
         verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         verify(response).setContentType("application/json");
         assertEquals("{\"error\":\"Database error\"}", stringWriter.toString().trim());
     }
     @Test
     public void testDoPost_CatchBlock() throws Exception {
-        // Подготовка тестовых данных
+
         String customerJson = "{\"id\":1,\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}";
         BufferedReader reader = new BufferedReader(new StringReader(customerJson));
         when(request.getReader()).thenReturn(reader);
@@ -231,7 +219,7 @@ void testDoPutWithInvalidJson() throws Exception {
 
         customerServlet.doPost(request, response);
 
-        // Проверка ожидаемого поведения
+
         verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         assertEquals("{\"error\":\"Database error\"}", stringWriter.toString().trim());
     }
@@ -251,15 +239,15 @@ void testDoPutWithInvalidJson() throws Exception {
     }
     @Test
     void testInit() throws ServletException {
-        // Устанавливаем реальные параметры для CustomerRepository
+
         String jdbcUrl = "jdbc:postgresql://localhost:5432/myDataBase";
         String username = "postgres";
         String password = "postgres";
 
-        // Выполняем инициализацию сервлета
+
         customerServlet.init();
 
-        // Проверяем, что customerService был инициализирован
+
         assertNotNull(customerServlet.customerService, "CustomerService should be initialized");
 
 
