@@ -10,7 +10,11 @@ import java.util.List;
 
 public class MechanicRepository implements MechanicInterface {
 
+    private  Connection connection;
 
+    public MechanicRepository(Connection connection) {
+        this.connection = connection;
+    }
 
 
 
@@ -41,27 +45,27 @@ public class MechanicRepository implements MechanicInterface {
         }
     }
 
-    public MechanicRepository() {
-    }
 
-    @Override
     public void addMechanic(Mechanic mechanic) throws SQLException {
         if (mechanic.getName() == null) {
             throw new SQLException("Mechanic name cannot be null");
         }
 
-        try (Connection connection = getConnection();
+        try (Connection connection = getConnection(); // Используем реальный Connection
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_MECHANIC_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, mechanic.getName());
             preparedStatement.executeUpdate();
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    mechanic.setId(generatedKeys.getInt(1));
+               if (generatedKeys.next()) {
+                    mechanic.setId(generatedKeys.getInt(1)); // Устанавливаем ID из ResultSet
                     System.out.println("добавляю в базу ");
                 }
             }
         }
     }
+
+
+
 
     @Override
     public Mechanic getMechanicById(int id) throws SQLException {
@@ -133,7 +137,7 @@ public class MechanicRepository implements MechanicInterface {
         return mechanics;
     }
 
-    public List<Car> getCarsByMechanicId(int mechanicId) throws SQLException {
+    public  List<Car> getCarsByMechanicId(int mechanicId) throws SQLException {
         List<Car> cars = new ArrayList<>();
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_CARS_BY_MECHANIC_ID_SQL)) {
@@ -153,6 +157,6 @@ public class MechanicRepository implements MechanicInterface {
     }
 
     protected Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, Username, Password);
+        return connection;
     }
 }

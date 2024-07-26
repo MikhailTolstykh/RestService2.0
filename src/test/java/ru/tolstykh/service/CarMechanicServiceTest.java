@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
- class CarMechanicServiceTest {
+class CarMechanicServiceTest {
 
     private CarMechanicRepository mockRepository;
     private Connection mockConnection;
@@ -112,17 +112,7 @@ import static org.mockito.Mockito.*;
         assertEquals("Connection close error", thrown.getMessage());
     }
 
-    @Test
-    void shouldHandleSQLExceptionWhenConnectionIsAlreadyClosed() throws SQLException {
-        // Arrange
-        when(mockConnection.isClosed()).thenReturn(true);
 
-        // Act
-        service.close();
-
-        // Assert
-        verify(mockConnection, never()).close();
-    }
 
     @Test
     void shouldHandleSQLExceptionWhenClosingConnectionAndNotNull() throws SQLException {
@@ -135,23 +125,17 @@ import static org.mockito.Mockito.*;
         assertEquals("Connection close error", thrown.getMessage());
     }
 
+    @Test
+    void shouldNotThrowExceptionIfConnectionIsAlreadyClosedAndCloseFails() throws SQLException {
+        // Arrange: setup mock behavior
+        when(mockConnection.isClosed()).thenReturn(true);
 
+        // Act & Assert: call the close method and ensure no exception is thrown
+        service.close();
 
+        // Verify that connection.close() was not called
+        verify(mockConnection, never()).close();
+    }
 
-
-
-
-
-     @Test
-     void shouldNotThrowExceptionIfConnectionIsAlreadyClosedAndCloseFails() throws SQLException {
-         // Arrange: setup mock behavior
-         when(mockConnection.isClosed()).thenReturn(true);
-
-         // Act & Assert: call the close method and ensure no exception is thrown
-         service.close();
-
-         // Verify that connection.close() was not called
-         verify(mockConnection, never()).close();
-     }
- }
+}
 

@@ -7,6 +7,8 @@ import ru.tolstykh.entity.Mechanic;
 import ru.tolstykh.repository.MechanicRepository;
 import ru.tolstykh.service.MechanicService;
 import ru.tolstykh.service.MechanicServiceInterface;
+import ru.tolstykh.util.DatabaseConfig;
+import ru.tolstykh.util.DatabaseConnection;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -16,18 +18,25 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 @WebServlet(name="MechanicServlet ",urlPatterns = "/mechanic/*")
 public class MechanicServlet extends HttpServlet {
-
+DatabaseConnection databaseConnection;
     MechanicServiceInterface mechanicService;
 
     @Override
     public void init() throws ServletException {
 
-        mechanicService = new MechanicService(new MechanicRepository());
+        try {
+            mechanicService = new MechanicService(new MechanicRepository(DatabaseConnection.getConnectionToDataBase()));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

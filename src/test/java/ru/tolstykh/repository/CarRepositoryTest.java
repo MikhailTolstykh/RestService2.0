@@ -239,7 +239,7 @@ public class CarRepositoryTest {
 
     @Test
     void shouldGetMechanicsByCarId() throws SQLException {
-        // Добавляем клиента для связи с машиной
+
         String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('John Doe', 'john.doe@example.com') RETURNING id;";
         int customerId;
         try (Connection connection = dataSource.getConnection();
@@ -279,7 +279,7 @@ public class CarRepositoryTest {
             }
         }
 
-        // Связываем машину и механиков
+
         String insertCarMechanic1SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, ?);";
         String insertCarMechanic2SQL = "INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, ?);";
 
@@ -292,7 +292,7 @@ public class CarRepositoryTest {
             preparedStatement2.executeUpdate();
         }
 
-        // Проверяем, что метод возвращает корректный список механиков
+
         List<Mechanic> mechanics = carRepository.getMechanicsByCarId(1);
         assertNotNull(mechanics);
         assertEquals(2, mechanics.size(), "Expected 2 mechanics in the list.");
@@ -302,7 +302,7 @@ public class CarRepositoryTest {
 
     @Test
     void shouldHandleSQLExceptionInGetMechanicsByCarId() throws SQLException {
-        // Мокируем CarRepository и Connection
+
         CarRepository mockCarRepository = Mockito.spy(new CarRepository(postgresContainer.getJdbcUrl(),
                 postgresContainer.getUsername(), postgresContainer.getPassword()));
         Connection mockConnection = Mockito.mock(Connection.class);
@@ -312,7 +312,6 @@ public class CarRepositoryTest {
         Mockito.doReturn(mockConnection).when(mockCarRepository).getConnection();
         Mockito.when(mockConnection.prepareStatement(Mockito.anyString())).thenThrow(new SQLException("Test SQL Exception"));
 
-        // Проверяем, что метод выбрасывает RuntimeException с корректным сообщением
         Exception exception = assertThrows(RuntimeException.class, () -> {
             mockCarRepository.getMechanicsByCarId(1);
         });
@@ -324,7 +323,7 @@ public class CarRepositoryTest {
 
     @Test
     void shouldUpdateCarWithValidData() throws SQLException {
-        // Добавляем клиента
+
         String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('John Doe', 'john.doe@example.com') RETURNING id;";
         int customerId;
         try (Connection connection = dataSource.getConnection();
@@ -337,15 +336,15 @@ public class CarRepositoryTest {
             }
         }
 
-        // Добавляем машину
+
         Car car = new Car("Toyota Corolla", customerId);
         carRepository.addCar(car);
 
-        // Обновляем машину
+
         Car updatedCar = new Car(1, "Toyota Camry", customerId);
         carRepository.updateCar(updatedCar);
 
-        // Проверяем, что данные обновлены
+
         Car fetchedCar = carRepository.getCarById(1);
         assertNotNull(fetchedCar);
         assertEquals("Toyota Camry", fetchedCar.getModel());
@@ -354,7 +353,7 @@ public class CarRepositoryTest {
 
     @Test
     void shouldUpdateCarWithZeroCustomerId() throws SQLException {
-        // Добавляем клиента
+
         String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Jane Doe', 'jane.doe@example.com') RETURNING id;";
         int customerId;
         try (Connection connection = dataSource.getConnection();
@@ -373,7 +372,7 @@ public class CarRepositoryTest {
 
     @Test
     void shouldHandleEmptyModel() throws SQLException {
-        // Добавляем клиента
+
         String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('John Doe', 'john.doe@example.com') RETURNING id;";
         int customerId;
         try (Connection connection = dataSource.getConnection();
@@ -386,15 +385,14 @@ public class CarRepositoryTest {
             }
         }
 
-        // Добавляем машину
         Car car = new Car("Toyota Corolla", customerId);
         carRepository.addCar(car);
 
-        // Обновляем модель автомобиля на пустую строку
+
         Car updatedCar = new Car(1, "", customerId);
         carRepository.updateCar(updatedCar);
 
-        // Проверяем, что модель обновлена на пустую строку
+
         Car fetchedCar = carRepository.getCarById(1);
         assertNotNull(fetchedCar);
         assertEquals("", fetchedCar.getModel());
@@ -487,7 +485,6 @@ public class CarRepositoryTest {
             preparedStatement2.executeUpdate();
         }
 
-        // Проверяем, что метод возвращает корректный список механиков
         List<Mechanic> mechanics = carRepository.getMechanicsByCarId(1);
         assertNotNull(mechanics);
         assertEquals(2, mechanics.size(), "Expected 2 mechanics in the list.");
@@ -497,21 +494,20 @@ public class CarRepositoryTest {
 
     @Test
     void shouldThrowExceptionForInvalidCustomerId() {
-        // Создаем машину с некорректным customerId (0)
+
         Car car = new Car("Some Model", 0);
 
-        // Ожидаем, что метод updateCar выбросит исключение
+
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
             carRepository.updateCar(car);
         });
 
-        // Проверяем, что сообщение исключения содержит ожидаемое
         assertTrue(thrown.getMessage().contains("Invalid customerId"));
     }
 
     @Test
     void shouldHandleUpdateForNonExistentCar() throws SQLException {
-        // Добавляем клиента
+
         String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Bob Doe', 'bob.doe@example.com') RETURNING id;";
         int customerId;
         try (Connection connection = dataSource.getConnection();
@@ -524,13 +520,11 @@ public class CarRepositoryTest {
             }
         }
 
-        // Попробуем обновить машину, которой нет в базе данных
         Car nonExistentCar = new Car(999, "Nonexistent Model", customerId);
 
-        // Ожидаем, что метод updateCar выполнится без ошибок, но данные не будут обновлены
         assertDoesNotThrow(() -> carRepository.updateCar(nonExistentCar));
 
-        // Проверяем, что данные не обновились (поиск по ID 999)
+
         Car fetchedCar = carRepository.getCarById(999);
         assertNull(fetchedCar, "Car should not exist");
     }
@@ -541,17 +535,17 @@ public class CarRepositoryTest {
             new CustomerRepository(null, null, null);
         }, "Database configuration is missing. URL, Username, or Password is null.");
 
-        // Проверка, когда URL равен null
+
         assertThrows(RuntimeException.class, () -> {
             new CustomerRepository(null, "username", "password");
         }, "Database configuration is missing. URL, Username, or Password is null.");
 
-        // Проверка, когда Username равен null
+
         assertThrows(RuntimeException.class, () -> {
             new CustomerRepository("jdbcUrl", null, "password");
         }, "Database configuration is missing. URL, Username, or Password is null.");
 
-        // Проверка, когда Password равен null
+
         assertThrows(RuntimeException.class, () -> {
             new CustomerRepository("jdbcUrl", "username", null);
         }, "Database configuration is missing. URL, Username, or Password is null.");
@@ -564,7 +558,7 @@ public class CarRepositoryTest {
 
     @Test
     void shouldHandleClassNotFoundException() {
-        // Измените класс драйвера на несуществующий
+
         DatabaseConnection dbConn = new DatabaseConnection("jdbc:postgresql://localhost:5432/mydb", "user", "password") {
             @Override
             protected void loadDriver() throws ClassNotFoundException {
@@ -573,7 +567,7 @@ public class CarRepositoryTest {
             }
         };
 
-        // Проверяем, что класс драйвера не найден
+
         assertThrows(RuntimeException.class, dbConn::getConnection);
     }
 
@@ -602,21 +596,21 @@ public class CarRepositoryTest {
             return connection;
         }
 
-        // Метод для загрузки драйвера
+
         protected void loadDriver() throws ClassNotFoundException {
             Class.forName("org.postgresql.Driver");
         }
     }
     @Test
     void shouldReturnEmptyListWhenNoCarsInDatabase() throws SQLException {
-        // Проверяем, что в базе данных нет записей
+
         List<Car> cars = carRepository.getAllCars();
         assertNotNull(cars, "The result should not be null.");
         assertTrue(cars.isEmpty(), "The list should be empty when no cars are present.");
     }
     @Test
     void shouldReturnMultipleCarsWhenMultipleCarsExist() throws SQLException {
-        // Добавляем клиента
+
         String insertCustomerSQL = "INSERT INTO customer (name, email) VALUES ('Bob Smith', 'bob.smith@example.com') RETURNING id;";
         int customerId;
         try (Connection connection = dataSource.getConnection();
@@ -629,21 +623,34 @@ public class CarRepositoryTest {
             }
         }
 
-        // Добавляем несколько машин
+
         Car car1 = new Car("Ford Focus", customerId);
         Car car2 = new Car("Honda Civic", customerId);
         carRepository.addCar(car1);
         carRepository.addCar(car2);
 
-        // Проверяем, что метод возвращает обе машины
+
         List<Car> cars = carRepository.getAllCars();
         assertNotNull(cars, "The result should not be null.");
         assertEquals(2, cars.size(), "The list should contain exactly two cars.");
         assertTrue(cars.stream().anyMatch(car -> car.getModel().equals("Ford Focus")), "The list should contain 'Ford Focus'.");
         assertTrue(cars.stream().anyMatch(car -> car.getModel().equals("Honda Civic")), "The list should contain 'Honda Civic'.");
     }
+    @Test
+    void testConstructorSetsConnection() {
+
+        assertNotNull(carRepository, "CarRepository instance should not be null");
+
+        assertDoesNotThrow(() -> {
+
+            carRepository.getAllCars();
+        });
+    }
+
+    @Test
+    public void testCarRepositoryConstructor() {
+        assertNotNull(carRepository);
+    }
+
 
 }
-
-
-

@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@WebServlet(name="CarServlet",urlPatterns = "/car/*")
+@WebServlet(name="CarServlet",urlPatterns = "/car")
 public class CarServlet extends HttpServlet {
     CarServiceInterface carService;
     public CarServlet() {

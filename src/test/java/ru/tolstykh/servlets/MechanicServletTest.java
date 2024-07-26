@@ -2,15 +2,15 @@ package ru.tolstykh.servlets;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonMappingException;
 import ru.tolstykh.dto.MechanicDTO;
 import ru.tolstykh.entity.Mechanic;
 import ru.tolstykh.repository.MechanicRepository;
 import ru.tolstykh.service.MechanicService;
 import ru.tolstykh.service.MechanicServiceInterface;
+import ru.tolstykh.util.DatabaseConnection;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -369,7 +369,35 @@ class MechanicServletTest {
 
 
     }
+
+    @Test
+    void shouldThrowRuntimeExceptionWhenSQLExceptionOccurs() throws Exception {
+        try (MockedStatic<DatabaseConnection> mockedDatabaseConnection = Mockito.mockStatic(DatabaseConnection.class)) {
+            mockedDatabaseConnection.when(DatabaseConnection::getConnectionToDataBase)
+                    .thenThrow(new SQLException("Database error"));
+
+            assertThrows(RuntimeException.class, () -> mechanicServlet.init(), "Expected RuntimeException to be thrown");
+        }
+    }
+
+    @Test
+    void shouldThrowRuntimeExceptionWhenClassNotFoundExceptionOccurs() throws Exception {
+        try (MockedStatic<DatabaseConnection> mockedDatabaseConnection = Mockito.mockStatic(DatabaseConnection.class)) {
+            mockedDatabaseConnection.when(DatabaseConnection::getConnectionToDataBase)
+                    .thenThrow(new ClassNotFoundException("Class not found"));
+
+            assertThrows(RuntimeException.class, () -> mechanicServlet.init(), "Expected RuntimeException to be thrown");
+        }
+    }
+
+
 }
+
+
+
+
+
+
 
 
 

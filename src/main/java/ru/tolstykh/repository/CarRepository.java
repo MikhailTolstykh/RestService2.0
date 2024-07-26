@@ -18,6 +18,11 @@ public class CarRepository implements CarInterface{
     public CarRepository() {
     }
 
+    private Connection connection;
+
+    public CarRepository(Connection connection) {
+        this.connection = connection;
+    }
     public CarRepository(String URL, String username, String password) {
         this.URL = URL;
         Username = username;
@@ -66,13 +71,10 @@ public class CarRepository implements CarInterface{
                 String model = resultSet.getString("model");
                 int customerId = resultSet.getInt("customer_id");
 
-                Customer customer = null;
-                if (customerId != 0) {
-                    CustomerRepository customerRepository = new CustomerRepository(URL,Username,Password);
-                    customer = customerRepository.getCustomerById(customerId);
-                }
+                CustomerRepository customerRepository = new CustomerRepository(URL, Username, Password);
+                Customer customer = customerRepository.getCustomerById(customerId);
 
-                MechanicRepository mechanicRepository = new MechanicRepository();
+                MechanicRepository mechanicRepository = new MechanicRepository(getConnection());
                 List<Mechanic> mechanics = mechanicRepository.getMechanicsByCarId(id);
 
                 car = new Car(id, model, customerId);
@@ -122,12 +124,10 @@ public class CarRepository implements CarInterface{
                 int customerId = resultSet.getInt("customer_id");
 
                 Customer customer = null;
-                if (customerId != 0) {
-                    CustomerRepository customerRepository = new CustomerRepository(URL,Username,Password);
-                    customer = customerRepository.getCustomerById(customerId);
-                }
+                CustomerRepository customerRepository = new CustomerRepository(URL, Username, Password);
+                customer = customerRepository.getCustomerById(customerId);
 
-                MechanicRepository mechanicRepository = new MechanicRepository();
+                MechanicRepository mechanicRepository = new MechanicRepository(getConnection());
                 List<Mechanic> mechanics = mechanicRepository.getMechanicsByCarId(id);
 
                 Car car = new Car(id, model, customerId);

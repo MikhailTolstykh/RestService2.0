@@ -105,10 +105,8 @@ public class CarMechanicRepositoryTest {
             statement.execute(createCarMechanicTableSQL);
         }
     }
-
     @Test
     void GetCarsByMechanicId() throws SQLException {
-
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             statement.execute("INSERT INTO car (model, customer_id) VALUES ('Model S', 1), ('Model 3', 2);");
@@ -116,12 +114,10 @@ public class CarMechanicRepositoryTest {
             statement.execute("INSERT INTO car_mechanic (car_id, mechanic_id) VALUES (1, 1), (2, 1);");
         }
 
-
         try (Connection connection = dataSource.getConnection()) {
-            carMechanicRepository = new CarMechanicRepository(connection);
+           mechanicRepository = new MechanicRepository(connection);  // Инициализация с действительным соединением
 
-
-            List<Car> cars = mechanicRepository.getCarsByMechanicId(1);
+            List<Car> cars = mechanicRepository.getCarsByMechanicId(1);  // Проверьте правильность вызова метода
 
             assertNotNull(cars);
             assertEquals(2, cars.size());

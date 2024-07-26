@@ -3,17 +3,9 @@
   <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.52">
     <root id="1">
       <DateStyle>dmy</DateStyle>
-      <Grants>1||-9223372036854775808|c|G
-1||10|c|G
-1||10|C|G
-1||10|T|G
-4||-9223372036854775808|c|G
-4||10|c|G
-4||10|C|G
-4||10|T|G</Grants>
-      <IntrospectionStateNumber>2944</IntrospectionStateNumber>
+      <IntrospectionStateNumber>2957</IntrospectionStateNumber>
       <ServerVersion>16.3</ServerVersion>
-      <StartupTime>1721628813</StartupTime>
+      <StartupTime>1721792610</StartupTime>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -808,7 +800,7 @@ false Zulu
 14643||10|C|G
 14643||-9223372036854775808|U|G
 14643||10|U|G</Grants>
-      <IntrospectionStateNumber>2944</IntrospectionStateNumber>
+      <IntrospectionStateNumber>2957</IntrospectionStateNumber>
       <ObjectId>24576</ObjectId>
       <OwnerName>postgres</OwnerName>
     </database>
@@ -4228,8 +4220,8 @@ false Zulu
       <ValidatorSchema>pg_catalog</ValidatorSchema>
     </language>
     <schema id="262" parent="2" name="car_service">
-      <IntrospectionStateNumber>2944</IntrospectionStateNumber>
-      <LastIntrospectionLocalTimestamp>2024-07-22.16:28:29</LastIntrospectionLocalTimestamp>
+      <IntrospectionStateNumber>2957</IntrospectionStateNumber>
+      <LastIntrospectionLocalTimestamp>2024-07-24.15:43:12</LastIntrospectionLocalTimestamp>
       <ObjectId>52101</ObjectId>
       <StateNumber>2365</StateNumber>
       <OwnerName>postgres</OwnerName>

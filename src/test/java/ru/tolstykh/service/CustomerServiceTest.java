@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ru.tolstykh.repository.CustomerRepository;
-import ru.tolstykh.service.CustomerService;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -16,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 
- class TestCustomerService {
+ class CustomerServiceTest {
 
     @Mock
     private CustomerRepository customerRepository;

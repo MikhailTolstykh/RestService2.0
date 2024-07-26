@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS car
 
 INSERT INTO customer values ()
 
-INSERT INTO customer (id,name) VALUES (1, 'lada', 'example@example.com',)
+INSERT INTO customer (id,name,email) VALUES (1, 'Pasha', 'example@example.com',)
