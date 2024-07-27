@@ -64,43 +64,13 @@ class MechanicServletTest {
     }
 
 
-    @Test
-    void testInit() throws Exception {
-        try (MockedStatic<DatabaseConnection> mockedDatabaseConnection = mockStatic(DatabaseConnection.class)) {
-            Connection mockConnection = mock(Connection.class);
-            mockedDatabaseConnection.when(DatabaseConnection::getConnectionToDataBase).thenReturn(mockConnection);
-
-            MechanicRepository mockRepository = mock(MechanicRepository.class);
-            MechanicService mockService = mock(MechanicService.class);
-
-            mechanicServlet.init();
-
-            assertNotNull(mechanicServlet.mechanicService, "MechanicService should be initialized");
-        } catch (Exception e) {
-            fail("Initialization failed with exception: " + e.getMessage());
-        }
-    }
-
 
     @Test
-    void shouldThrowRuntimeExceptionWhenSQLExceptionOccurs() throws Exception {
-        try (MockedStatic<DatabaseConnection> mockedDatabaseConnection = Mockito.mockStatic(DatabaseConnection.class)) {
-            mockedDatabaseConnection.when(DatabaseConnection::getConnectionToDataBase)
-                    .thenThrow(new SQLException("Database error"));
-
-            assertThrows(RuntimeException.class, () -> mechanicServlet.init(), "Expected RuntimeException to be thrown");
-        }
+    public void testInit() throws ServletException {
+        mechanicServlet.init();
+        assertNotNull(mechanicServlet.getMechanicService(), "mechanicService should be initialized");
     }
 
-    @Test
-    void shouldThrowRuntimeExceptionWhenClassNotFoundExceptionOccurs() throws Exception {
-        try (MockedStatic<DatabaseConnection> mockedDatabaseConnection = Mockito.mockStatic(DatabaseConnection.class)) {
-            mockedDatabaseConnection.when(DatabaseConnection::getConnectionToDataBase)
-                    .thenThrow(new ClassNotFoundException("Class not found"));
-
-            assertThrows(RuntimeException.class, () -> mechanicServlet.init(), "Expected RuntimeException to be thrown");
-        }
-    }
 
     @Test
     void testDoDeleteSQLException() throws Exception {
@@ -287,5 +257,30 @@ class MechanicServletTest {
         verify(response).setContentType("application/json");
         verify(writer).write("{\"error\":\"Invalid JSON format\"}");
         verify(writer).flush();
+    }
+
+    @Test
+    public void testDoPut_CatchBlock() throws ServletException, IOException, SQLException {
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        String json = "{\"id\":1,\"name\":\"John Doe\"}";
+        BufferedReader reader = new BufferedReader(new StringReader(json));
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter writer = new PrintWriter(stringWriter);
+
+        when(request.getReader()).thenReturn(reader);
+        when(response.getWriter()).thenReturn(writer);
+
+        doThrow(new SQLException("Database error")).when(mechanicService).updateMechanic(any(Mechanic.class));
+
+
+        mechanicServlet.doPut(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(response).setContentType("application/json");
+        writer.flush(); // Ensure all data is written to the stringWriter
+        String responseContent = stringWriter.toString();
+        assertEquals("{\"error\":\"Database error\"}", responseContent);
     }
 }

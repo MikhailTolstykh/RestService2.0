@@ -24,19 +24,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 @WebServlet(name="MechanicServlet ",urlPatterns = "/mechanic/*")
 public class MechanicServlet extends HttpServlet {
-DatabaseConnection databaseConnection;
+    public MechanicServiceInterface getMechanicService() {
+        return mechanicService;
+    }
+
     MechanicServiceInterface mechanicService;
 
     @Override
     public void init() throws ServletException {
 
-        try {
-            mechanicService = new MechanicService(new MechanicRepository(DatabaseConnection.getConnectionToDataBase()));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        mechanicService = new MechanicService(new MechanicRepository());
     }
 
     @Override
