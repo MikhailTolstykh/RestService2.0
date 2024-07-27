@@ -16,7 +16,8 @@ public class MechanicRepository implements MechanicInterface {
         this.connection = connection;
     }
 
-
+    public MechanicRepository() {
+    }
 
     private String URL = DatabaseConfig.getProperty("db.url");
     private String Username = DatabaseConfig.getProperty("db.username");
